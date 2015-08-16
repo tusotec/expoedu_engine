@@ -46,14 +46,14 @@
 
 
   function addStand01 () {
-    scene.remove(stand02);
-    scene.add(stand01);
+    Engine.scene.remove(stand02);
+    Engine.scene.add(stand01);
   
   }
 
   function addStand02 () {
-    scene.remove(stand01);
-    scene.add(stand02);
+    Engine.scene.remove(stand01);
+    Engine.scene.add(stand02);
   }
 
     function rotateCam(obj, center, dist, value) {
@@ -66,9 +66,9 @@
   }
 
   function addCube() {
-    scene.add(cube);
+    Engine.scene.add(cube);
   }
 
   function removeCube() {
-    scene.remove(cube);
+    Engine.scene.remove(cube);
   }

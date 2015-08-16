@@ -2,6 +2,7 @@ window.Engine = {
   renderer: null,
   scene: null,
   camera: null,
+  light: null,
   clock: null,
   update: function () {console.log("Update loop is empty!!")},
   running: false,
@@ -33,6 +34,10 @@ window.Engine.init = function (params) {
   }
 
   this.scene = new THREE.Scene();
+
+  this.light = new THREE.AmbientLight(0xffffff);
+  this.scene.add(this.light);
+
   this.camera = new THREE.PerspectiveCamera(45, width/height, near, far);
 
   this.clock = new THREE.Clock();

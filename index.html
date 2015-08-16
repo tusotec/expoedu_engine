@@ -56,14 +56,6 @@
 <script type="text/javascript">
 
   Engine.init({container: renderDiv, fps: 15});
-  var scene = Engine.scene;
-  var camera = Engine.camera;
-
-  var light = new THREE.AmbientLight(0xffffff);
-
-  scene.add(light);
-
-  var clock = new THREE.Clock();
 
   var boxGeom = new THREE.BoxGeometry(0.5,1.6,0.5);
   var boxMat = new THREE.MeshBasicMaterial({color:0x0000ff});
@@ -87,7 +79,7 @@
     pabellon.scale.x = 0.024;
     pabellon.scale.y = 0.024;
     pabellon.scale.z = 0.024;
-    scene.add( pabellon );
+    Engine.scene.add( pabellon );
 
   }, onProgress, onError );
   //--------------------------------------------------------------------------------
@@ -104,22 +96,7 @@
     setLoaded();
   });
 
-
-  var rotPos = 0;
-  var camDist = 5;
- 
-
-
   addCube();
-
-  var center = {x:0, y:1, z:0};
-  var tecla = {};
-  var antX = 300;
-  var antY = 0;
-  var mouseKeep = false;
-  var moveY, clickX;
-
-  // eventos raton
 
   var caster = new THREE.Raycaster();
   var ray = new THREE.Vector3();
@@ -128,9 +105,9 @@
   var pause = false;
 
   var arrow = new THREE.ArrowHelper(ray, new THREE.Vector3(0,0,0), 10);
-  scene.add(arrow);
+  Engine.scene.add(arrow);
 
-  var controller = new CharacterController({mesh: cube, cam: camera, velocity: 3, distance: 4});
+  var controller = new CharacterController({mesh: cube, cam: Engine.camera, velocity: 3, distance: 4});
        
   function render(delta) {
     //eventosKey();

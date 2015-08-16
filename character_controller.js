@@ -79,7 +79,7 @@ window.CharacterController = function(params) {
   this.distance = params.distance || 1;
   this.yAngle = params.camerAngle || 0; // Angulo en radianes.
   this.xAngle = 0;
-  this.maxAngle = params.maxAngle || 3;
+  this.maxAngle = params.maxAngle || 1.4; // Aprox. PI/2
   this.xSensibility = params.xSensibility || 100;
   this.ySensibility = params.ySensibility || 100;
   this.characterAngle = 0;
@@ -114,8 +114,8 @@ window.CharacterController = function(params) {
       this.yAngle -= mouse.movedX / this.xSensibility;
       if (this.yAngle > Math.PI) {this.yAngle -= Math.PI*2;}
       if (this.yAngle < Math.PI) {this.yAngle += Math.PI*2;}
-      //if (this.xAngle > this.maxAngle) {this.xAngle = this.maxAngle}
-      //if (this.xAngle < -this.maxAngle) {this.xAngle = -this.maxAngle}
+      if (this.xAngle > this.maxAngle) {this.xAngle = this.maxAngle}
+      if (this.xAngle < -this.maxAngle) {this.xAngle = -this.maxAngle}
       updateMouse();
     }
   };
