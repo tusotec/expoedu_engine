@@ -108,7 +108,7 @@
   Engine.scene.add(arrow);
 
   var controller = new CharacterController({mesh: cube, cam: Engine.camera, velocity: 3, distance: 4});
-       
+       var k = 0;
   function render(delta) {
     //eventosKey();
 
@@ -128,6 +128,51 @@
     if (pabellon) {
       collisions = caster.intersectObject(pabellon, true);
       if (collisions.length > 0) {
+          
+          // isaac
+          for (var i = 0; i <  collisions.length; i++) 
+          {
+              for (var j = i + 1; j <  collisions.length; j++) 
+              {               
+                if(collisions[i].distance <= 0.5 || collisions[j].distance <= 0.5 )
+                {
+                  if(keys.up)
+                  {
+                    band.up = true;
+                  }
+                  if(keys.down)
+                  {
+                    band.down = true;
+                  }
+                  if(keys.right)
+                  {
+                    band.right = true;
+                  }
+                  if(keys.left)
+                  {
+                    band.left = true;
+                  }
+                }else{
+                  if(keys.up && band.up)
+                  {
+                    band.up = false;
+                  }
+                  if(keys.down && band.down)
+                  {
+                    band.down = false;
+                  }
+                  if(keys.right && band.right)
+                  {
+                    band.right = false;
+                  }
+                  if(keys.left && band.left)
+                  {
+                    band.left = false;
+                  }
+                }
+              }            
+          }
+
         distanceSpan.textContent = collisions[0].distance;
       } else {
         distanceSpan.textContent = "NULL";

@@ -1,4 +1,5 @@
 var keys = {"up": false, "down": false, "left": false, "right": false};
+var band = {"up": false, "down": false, "left": false, "right": false};
 
 document.addEventListener('keydown', function (event) {
   switch (event.keyCode) {
@@ -89,10 +90,10 @@ window.CharacterController = function(params) {
     if (delta == undefined) {delta = 1;}
 
     var x = 0, y = 0;
-    if (keys.up) {y -= 1;}
-    if (keys.down) {y += 1;}
-    if (keys.left) {x -= 1;}
-    if (keys.right) {x += 1;}
+    if (keys.up && !band.up){y -= 1;}
+    if (keys.down && !band.down){y += 1;}
+    if (keys.left && !band.left){x -= 1;}
+    if (keys.right && !band.right){x += 1;}
 
     if (x != 0 || y != 0) {
       // atan2: función trigonométrica para convertir coordenadas cartesianas
