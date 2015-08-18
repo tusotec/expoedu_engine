@@ -1,4 +1,5 @@
 var keys = {"up": false, "down": false, "left": false, "right": false};
+var keyscoll = {"up": false, "down": false, "left": false, "right": false};
 var band = {"up": false, "down": false, "left": false, "right": false};
 
 document.addEventListener('keydown', function (event) {
@@ -6,18 +7,26 @@ document.addEventListener('keydown', function (event) {
     case 38:
     case 87: // W
       keys.up = true;
+      keyscoll.up = true;
+      keyscoll.down = keyscoll.left = keyscoll.right = false;
       break;
     case 37:
     case 65: // A
       keys.left = true;
+      keyscoll.left = true;
+      keyscoll.down = keyscoll.up = keyscoll.right = false;
       break;
     case 83:
     case 40: // S
       keys.down = true;
+      keyscoll.down = true;
+      keyscoll.up = keyscoll.left = keyscoll.right = false;
       break;
     case 68:
     case 39: // D
       keys.right = true;
+      keyscoll.right = true;
+      keyscoll.down = keyscoll.left = keyscoll.up = false;
       break;
   }
 }, false);

@@ -99,13 +99,28 @@
   addCube();
 
   var caster = new THREE.Raycaster();
+  var casterBack = new THREE.Raycaster();
+  var casterLeft = new THREE.Raycaster();
+  var casterRight = new THREE.Raycaster();
   var ray = new THREE.Vector3();
+  var rayBack = new THREE.Vector3();
+  var rayRight = new THREE.Vector3();
+  var rayLeft = new THREE.Vector3();
   var collidables = [stand02];
-  var collisions;
+  var collisions, collisionsBack, collisionsRight, collisionsLeft;
   var pause = false;
 
   var arrow = new THREE.ArrowHelper(ray, new THREE.Vector3(0,0,0), 10);
   Engine.scene.add(arrow);
+
+  var arrowBack = new THREE.ArrowHelper(rayBack, new THREE.Vector3(0,0,0), 10);
+  Engine.scene.add(arrowBack);
+
+  var arrowLeft = new THREE.ArrowHelper(rayBack, new THREE.Vector3(0,0,0), 10);
+  Engine.scene.add(arrowLeft);
+
+  var arrowRight = new THREE.ArrowHelper(rayBack, new THREE.Vector3(0,0,0), 10);
+  Engine.scene.add(arrowRight);
 
   var controller = new CharacterController({mesh: cube, cam: Engine.camera, velocity: 3, distance: 4});
        var k = 0;
@@ -119,60 +134,100 @@
     ray.x = Math.sin(cube.rotation.y);
     ray.z = Math.cos(cube.rotation.y);
 
+    rayBack.x = Math.sin(cube.rotation.y + Math.PI);
+    rayBack.z = Math.cos(cube.rotation.y + Math.PI);
+
+    rayLeft.x = Math.sin(cube.rotation.y + (Math.PI*1.5));
+    rayLeft.z = Math.cos(cube.rotation.y + (Math.PI*1.5));
+
+    rayRight.x = Math.sin(cube.rotation.y + (Math.PI*0.5));
+    rayRight.z = Math.cos(cube.rotation.y + (Math.PI*0.5));
+
     caster.set(cube.position, ray);
+    casterBack.set(cube.position, rayBack);
+    casterLeft.set(cube.position, rayLeft);
+    casterRight.set(cube.position, rayRight);
+
     arrow.setDirection(ray);
     arrow.position.x = cube.position.x;
     arrow.position.z = cube.position.z;
     arrow.position.y = cube.position.y;
 
+    arrowBack.setDirection(rayBack);
+    arrowBack.position.x = cube.position.x;
+    arrowBack.position.z = cube.position.z;
+    arrowBack.position.y = cube.position.y;
+
+    arrowRight.setDirection(rayRight);
+    arrowRight.position.x = cube.position.x;
+    arrowRight.position.z = cube.position.z;
+    arrowRight.position.y = cube.position.y;
+
+    arrowLeft.setDirection(rayLeft);
+    arrowLeft.position.x = cube.position.x;
+    arrowLeft.position.z = cube.position.z;
+    arrowLeft.position.y = cube.position.y;
+
     if (pabellon) {
+
       collisions = caster.intersectObject(pabellon, true);
+      collisionsBack = casterBack.intersectObject(pabellon, true);
+      collisionsLeft = casterBack.intersectObject(pabellon, true);
+      collisionsRight = casterBack.intersectObject(pabellon, true);
+console.log('up: '+collisions[0].distance);
+console.log('back: '+collisionsBack[0].distance);
+console.log('left: '+collisionsLeft[0].distance);      
+console.log('right: '+collisionsRight[0].distance);   
+ if (collisions.length > 0) {
+if( collisions[0].distance < 0.5 || collisionsBack[0].distance < 0.5 || collisionsLeft[0].distance < 0.5 || collisionsRight[0].distance < 0.5 ) 
+{
+
+  if(keyscoll.up){band.up = true; band.down = band.left = band.left = false;}
+  if(keyscoll.down){band.down = true; band.up = band.left = band.left = false;}
+  if(keyscoll.left){band.left = true; band.down = band.up = band.left = false;}
+  if(keyscoll.right){band.right = true; band.down = band.left = band.up = false;}
+}else{
+  band.right = band.down = band.left = band.up = false;
+}  
+} 
       if (collisions.length > 0) {
-          
-          // isaac
+
+/*          
           for (var i = 0; i <  collisions.length; i++) 
           {
               for (var j = i + 1; j <  collisions.length; j++) 
-              {               
-                if(collisions[i].distance <= 0.5 || collisions[j].distance <= 0.5 )
+              {           
+               // console.log(collisionsBack);
+                console.log(collisionsLeft[0]);
+                 
+                if(collisions[i].distance <= 0.7 || collisions[j].distance <= 0.7 )
                 {
-                  if(keys.up)
+
+                  console.log(collisions[0]);
+                  if(keyscoll.up)
                   {
                     band.up = true;
                   }
-                  if(keys.down)
+                  if(keyscoll.down)
                   {
                     band.down = true;
                   }
-                  if(keys.right)
+                  if(keyscoll.right)
                   {
                     band.right = true;
                   }
-                  if(keys.left)
+                  if(keyscoll.left)
                   {
                     band.left = true;
                   }
-                }else{
-                  if(keys.up && band.up)
-                  {
-                    band.up = false;
-                  }
-                  if(keys.down && band.down)
-                  {
-                    band.down = false;
-                  }
-                  if(keys.right && band.right)
-                  {
-                    band.right = false;
-                  }
-                  if(keys.left && band.left)
-                  {
-                    band.left = false;
-                  }
                 }
+                console.log('keys');
+                console.log(keyscoll);
+                console.log('band');
+                console.log(band);
               }            
           }
-
+*/
         distanceSpan.textContent = collisions[0].distance;
       } else {
         distanceSpan.textContent = "NULL";
