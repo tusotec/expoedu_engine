@@ -67,6 +67,8 @@ function updateMouse () {
   mouse.movedY = 0;
 }
 
+
+/*
 document.addEventListener('mousedown', function (event) {
   mouse.dragging = true;
   mouse.startX = event.clientX;
@@ -81,6 +83,7 @@ document.addEventListener('mousemove', function (event) {
     mouse.movedY = event.clientY - mouse.startY;
   }
 }, false );
+*/
 
 window.CharacterController = function(params) {
   this.mesh = params.mesh;
@@ -144,3 +147,12 @@ window.CharacterController = function(params) {
     this.cam.lookAt(center);
   };
 };
+
+var myElement = document.getElementById('body');
+var mc = new Hammer(myElement);
+mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+mc.on("panleft panright panup pandown tap press", function(ev) {
+    mouse.movedX = ev.deltaX;
+    mouse.movedY = ev.deltaY;
+console.log(ev.center);
+});
