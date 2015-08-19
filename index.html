@@ -63,18 +63,6 @@
 
   Engine.init({container: renderDiv, fps: 15});
 
-
-  //----------------------
-  // control
-  var boxGeom = new THREE.BoxGeometry(0.2,0.2,0.2);
-  var boxMat = new THREE.MeshBasicMaterial({color:0x00ff00});
-  var cube2 = new THREE.Mesh(boxGeom, boxMat);
-  cube2.position.y = 0.8;
-  cube2.position.x = 10;
-  cube2.position.z = 10;
-  Engine.scene.add( cube2 );
-  //----------------------
-
   var boxGeom = new THREE.BoxGeometry(0.5,1.6,0.5);
   var boxMat = new THREE.MeshBasicMaterial({color:0x0000ff});
   var cube = new THREE.Mesh(boxGeom, boxMat);
@@ -148,10 +136,6 @@
     controller.updatePosition(delta);
     controller.updateMouse();
     controller.updateCamera();
-
-    cube2.position.x = (cube.position.x + Engine.camera.position.x)/2;
-    cube2.position.y = (cube.position.y + Engine.camera.position.y)/2;
-    cube2.position.z = (cube.position.z + Engine.camera.position.z)/2;
 
     ray.x = Math.sin(cube.rotation.y);
     ray.z = Math.cos(cube.rotation.y);
