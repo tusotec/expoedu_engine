@@ -9,22 +9,22 @@ mc.on("panleft panright tap press", function(ev) {
 deltax.textContent = ev.deltaX;
 deltay.textContent = ev.deltaY;
     if(ev.deltaX < 0)
-    {console.log('izq');
-    	band.left = true;
-    	band.down = band.up = band.left = false;
-    }else{console.log('der');
-    	band.right = true;
-    	band.down = band.left = band.up = false;
+    {
+        console.log('izq');
+    	
+    }else{
+
+        console.log('der');
     }
 
     if(ev.deltaY > 0)
-    {console.log('abajo');
-    	band.down = true;
-    	band.up = band.left = band.left = false;
-    }else{console.log('arriba');
-   		band.up = true;
-   		band.down = band.left = band.left = false;
-    
+    {
+        console.log('abajo');
+
+    }else{
+
+        console.log('arriba');
+         
     }
 
 });
