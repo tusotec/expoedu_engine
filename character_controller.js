@@ -53,40 +53,51 @@ document.addEventListener('keyup', function (event) {
 
 var mouse = {
   "dragging": false,
+  "x": 0, "y": 0,
   "startX": 0, "startY": 0,
+  "totalX": 0, "totalY": 0,
   "deltaX": 0, "deltaY": 0,
   "movedX": 0, "movedY": 0
 };
 
-function updateMouse () {
-  mouse.deltaX = mouse.movedX;
-  mouse.deltaY = mouse.movedY;
-  mouse.startX += mouse.movedX;
-  mouse.startY += mouse.movedY;
+var resetMouse = function () {
+  mouse.totalX = 0;
+  mouse.totalY = 0;
   mouse.movedX = 0;
   mouse.movedY = 0;
+  mouse.deltaX = 0;
+  mouse.deltaY = 0;
 }
-var mouseDown = function (event) {
-  mouse.dragging = true;
-  mouse.startX = event.clientX;
-  mouse.startY = event.clientY;
-}
-var mouseUp = function (event) {
-  mouse.dragging = false;
-}
-var mouseMove = function (event) {
-  if (mouse.dragging) {
-    mouse.movedX = event.clientX - mouse.startX;
-    mouse.movedY = event.clientY - mouse.startY;
-  }
-}
-document.addEventListener('mousedown', mouseDown, false );
-document.addEventListener('mouseup', mouseUp, false );
-document.addEventListener('mousemove', mouseMove, false );
 
-document.addEventListener('mousedown', mouseDown, false );
-document.addEventListener('mouseup', mouseUp, false );
-document.addEventListener('mousemove', mouseMove, false );
+Engine.onInit(function () {
+  var mc = new Hammer(Engine.canvas);
+  mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+  mc.on("panmove", function(ev) {
+    mouse.x = ev.center.x;
+    mouse.y = ev.center.y;
+    mouse.totalX = ev.deltaX;
+    mouse.totalY = ev.deltaY;
+  });
+
+  mc.on("panstart", function (ev) {
+    mouse.dragging = true;
+  })
+
+  mc.on("panend", function (ev) {
+    mouse.dragging = false;
+    resetMouse();
+  })
+});
+
+Engine.preUpdate(function () {
+  if (mouse.dragging) {
+    mouse.deltaX = mouse.totalX - mouse.movedX;
+    mouse.deltaY = mouse.totalY - mouse.movedY;
+    mouse.movedX = mouse.totalX;
+    mouse.movedY = mouse.totalY;
+  }
+});
 
 window.CharacterController = function(params) {
   this.mesh = params.mesh;
@@ -126,13 +137,12 @@ window.CharacterController = function(params) {
 
   this.updateMouse = function () {
     if (mouse.dragging) {
-      this.xAngle -= -mouse.movedY / this.ySensibility;
-      this.yAngle -= mouse.movedX / this.xSensibility;
+      this.xAngle -= -mouse.deltaY / this.ySensibility;
+      this.yAngle -= mouse.deltaX / this.xSensibility;
       if (this.yAngle > Math.PI) {this.yAngle -= Math.PI*2;}
       if (this.yAngle < Math.PI) {this.yAngle += Math.PI*2;}
       if (this.xAngle > this.maxAngle) {this.xAngle = this.maxAngle}
       if (this.xAngle < -this.maxAngle) {this.xAngle = -this.maxAngle}
-      updateMouse();
     }
   };
 

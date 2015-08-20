@@ -74,8 +74,8 @@ var renderFunc = function() {
 window.Engine.render = function() {
   var delta = this.clock.getDelta();
   
-  for (var i = 0; i < this._functions.init.length; i++) {
-    this._functions.init[i]();
+  for (var i = 0; i < this._functions.preUpdate.length; i++) {
+    this._functions.preUpdate[i]();
   }
 
   this.update(delta);
