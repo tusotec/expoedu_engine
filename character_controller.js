@@ -66,24 +66,27 @@ function updateMouse () {
   mouse.movedX = 0;
   mouse.movedY = 0;
 }
-
-
-/*
-document.addEventListener('mousedown', function (event) {
+var mouseDown = function (event) {
   mouse.dragging = true;
   mouse.startX = event.clientX;
   mouse.startY = event.clientY;
-}, false );
-document.addEventListener('mouseup', function (event) {
+}
+var mouseUp = function (event) {
   mouse.dragging = false;
-}, false );
-document.addEventListener('mousemove', function (event) {
+}
+var mouseMove = function (event) {
   if (mouse.dragging) {
     mouse.movedX = event.clientX - mouse.startX;
     mouse.movedY = event.clientY - mouse.startY;
   }
-}, false );
-*/
+}
+document.addEventListener('mousedown', mouseDown, false );
+document.addEventListener('mouseup', mouseUp, false );
+document.addEventListener('mousemove', mouseMove, false );
+
+document.addEventListener('mousedown', mouseDown, false );
+document.addEventListener('mouseup', mouseUp, false );
+document.addEventListener('mousemove', mouseMove, false );
 
 window.CharacterController = function(params) {
   this.mesh = params.mesh;
@@ -147,12 +150,3 @@ window.CharacterController = function(params) {
     this.cam.lookAt(center);
   };
 };
-
-var myElement = document.getElementById('body');
-var mc = new Hammer(myElement);
-mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-mc.on("panleft panright panup pandown tap press", function(ev) {
-    mouse.movedX = ev.deltaX;
-    mouse.movedY = ev.deltaY;
-console.log(ev.center);
-});

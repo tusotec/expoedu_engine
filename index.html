@@ -5,14 +5,15 @@
   <title>Prueba de Three JS</title>
   <script type="text/javascript" src="js/three.js"></script>
   <script type="text/javascript" src="js/OBJMTLLoader.js"></script>
-  <script type="text/javascript" src="js/OBJLoader.js"></script>
+  <script type="text/javascript" src="js/MyOBJLoader.js"></script>
   <script  type="text/javascript" src="js/DDSLoader.js"></script>
   <script  type="text/javascript" src="js/MTLLoader.js"></script>
+
+  <script type="text/javascript" src="js/hammer.js"></script>
   
   <script type="text/javascript" src="js/stands.js"></script>
 
   <script type="text/javascript" src="engine.js"></script>
-  <script src="https://hammerjs.github.io/dist/hammer.js"></script>
   <script type="text/javascript" src="character_controller.js"></script>
 
   <!--
@@ -43,18 +44,16 @@
 
 </head>
 <body id="body">
-<div id="myElement"  style="background-color:#cccccc;height:200px;width:200px;overflow:hidden;"></div>
+<div id="myElement"  style="background-color:#cccccc;height:200px;width:200px;overflow:hidden; display: none;"></div>
 <p>DeltaX: <span id="deltax"></span></p>
 <p>DeltaY: <span id="deltay"></span></p>
 <h1>Prueba de Three JS</h1>
 <div id="renderDiv"></div>
 
 <p>
-<span id="loadingSpan" style="display:inline;">Cargando Stands...</span>
-<span id="loadedSpan" style="display:none;">
-  <a href="javascript:addStand01();">Stand01</a>
-  <a href="javascript:addStand02();">Stand02</a>
-</span>
+<strong>Controles:</strong>
+Para moverse, usar las teclas W, A, S y D, o las flechas.
+Para mover la cámara, arrastrar con el mouse sobre el juego.
 </p>
 <p>Distancia: <span id="distanceSpan"></span></p>
 
@@ -88,6 +87,21 @@
     Engine.scene.add( pabellon );
 
   }, onProgress, onError );
+  
+  /*
+  var loader = new THREE.JSONLoader();
+  loader.load('expo/expo_completa.js', function(obj, mats) {
+    window.matz = mats;
+    console.log(window.matz);
+    for (var i = 0; i < mats.length; i++) {
+      mats[i].opacity = 1;
+      mats[i].transparent = false;
+    }
+    var nmat = new THREE.MeshFaceMaterial( mats );
+    pabellon = new THREE.Mesh(obj, nmat);
+    Engine.scene.add( pabellon );
+  }); */
+
   //--------------------------------------------------------------------------------
  
   LoadStand("stand01.js", "textures/diff01.png",
@@ -137,6 +151,7 @@
     controller.updateMouse();
     controller.updateCamera();
 
+    /*
     ray.x = Math.sin(cube.rotation.y);
     ray.z = Math.cos(cube.rotation.y);
 
@@ -181,18 +196,18 @@
       collisionsLeft = casterBack.intersectObject(pabellon, true);
       collisionsRight = casterBack.intersectObject(pabellon, true);
 
- if (collisions.length > 0) {
-if( collisions[0].distance < 0.7 || collisionsBack[0].distance < 0.7 || collisionsLeft[0].distance < 0.7 || collisionsRight[0].distance < 0.7 ) 
-{
+      if (collisions.length > 0) {
+        if( collisions[0].distance < 0.7 || collisionsBack[0].distance < 0.7 || collisionsLeft[0].distance < 0.7 || collisionsRight[0].distance < 0.7 ) 
+        {
 
-  if(keyscoll.up){band.up = true; band.down = band.left = band.left = false;}
-  if(keyscoll.down){band.down = true; band.up = band.left = band.left = false;}
-  if(keyscoll.left){band.left = true; band.down = band.up = band.left = false;}
-  if(keyscoll.right){band.right = true; band.down = band.left = band.up = false;}
-}else{
-  band.right = band.down = band.left = band.up = false;
-}  
-} 
+          if(keyscoll.up){band.up = true; band.down = band.left = band.left = false;}
+          if(keyscoll.down){band.down = true; band.up = band.left = band.left = false;}
+          if(keyscoll.left){band.left = true; band.down = band.up = band.left = false;}
+          if(keyscoll.right){band.right = true; band.down = band.left = band.up = false;}
+        }else{
+          band.right = band.down = band.left = band.up = false;
+        }  
+        } 
       if (collisions.length > 0) {
 
 
@@ -201,10 +216,18 @@ if( collisions[0].distance < 0.7 || collisionsBack[0].distance < 0.7 || collisio
         distanceSpan.textContent = "NULL";
       }
     }
+    */
   }
 
   Engine.update = render;
   Engine.start();
+
+
+
+var mc = new Hammer(Engine.canvas);
+mc.on("panleft panright panup pandown tap press", function(ev) {
+  console.log("Mover Canvas!!");
+});
 
 </script>
 <script type="text/javascript" src="touch_controller.js"></script>
