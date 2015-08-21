@@ -44,7 +44,9 @@
 
 </head>
 <body id="body">
-<div id="myElement"  style="background-color:#cccccc;height:200px;width:200px;overflow:hidden; display: none;"></div>
+<div id="myElement" style="background-color:#cccccc;height:200px;width:200px;overflow:hidden;">
+  <div style="background-color:#888888;height:4%;width:4%;margin:48%;"></div>
+</div>
 <p>Dragging: <span id="draggingSpan"></span></p>
 <p>DeltaX: <span id="deltax"></span></p>
 <p>DeltaY: <span id="deltay"></span></p>
@@ -76,7 +78,7 @@ Para mover la cámara, arrastrar con el mouse sobre el juego.
   var velocidadDesplazamiento = 0.3;
   var loaded = false
 
-  //*/ Modelo simple de la Expo
+  /*/ Modelo simple de la Expo
     var loader = new THREE.OBJMTLLoader();
     loader.load( 'fachada/fachada.obj', 'fachada/fachada.mtl', function ( object ) {
 
@@ -229,4 +231,5 @@ Para mover la cámara, arrastrar con el mouse sobre el juego.
 
 
 </script>
+<script type="text/javascript" src="touch_controller.js"></script>
 </html>
