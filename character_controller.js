@@ -1,103 +1,5 @@
-var keys = {"up": false, "down": false, "left": false, "right": false};
 var keyscoll = {"up": false, "down": false, "left": false, "right": false};
 var band = {"up": false, "down": false, "left": false, "right": false};
-
-document.addEventListener('keydown', function (event) {
-  switch (event.keyCode) {
-    case 38:
-    case 87: // W
-      keys.up = true;
-      keyscoll.up = true;
-      keyscoll.down = keyscoll.left = keyscoll.right = false;
-      break;
-    case 37:
-    case 65: // A
-      keys.left = true;
-      keyscoll.left = true;
-      keyscoll.down = keyscoll.up = keyscoll.right = false;
-      break;
-    case 83:
-    case 40: // S
-      keys.down = true;
-      keyscoll.down = true;
-      keyscoll.up = keyscoll.left = keyscoll.right = false;
-      break;
-    case 68:
-    case 39: // D
-      keys.right = true;
-      keyscoll.right = true;
-      keyscoll.down = keyscoll.left = keyscoll.up = false;
-      break;
-  }
-}, false);
-document.addEventListener('keyup', function (event) {
-  switch (event.keyCode) {
-    case 38:
-    case 87: // W
-      keys.up = false;
-      break;
-    case 37:
-    case 65: // A
-      keys.left = false;
-      break;
-    case 83:
-    case 40: // S
-      keys.down = false;
-      break;
-    case 68:
-    case 39: // D
-      keys.right = false;
-      break;
-  }
-}, false);
-
-var mouse = {
-  "dragging": false,
-  "x": 0, "y": 0,
-  "startX": 0, "startY": 0,
-  "totalX": 0, "totalY": 0,
-  "deltaX": 0, "deltaY": 0,
-  "movedX": 0, "movedY": 0
-};
-
-var resetMouse = function () {
-  mouse.totalX = 0;
-  mouse.totalY = 0;
-  mouse.movedX = 0;
-  mouse.movedY = 0;
-  mouse.deltaX = 0;
-  mouse.deltaY = 0;
-}
-
-Engine.onInit(function () {
-  var mc = new Hammer(Engine.canvas);
-  mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-
-  mc.on("panmove", function(ev) {
-    mouse.x = ev.center.x;
-    mouse.y = ev.center.y;
-    mouse.totalX = ev.deltaX;
-    mouse.totalY = ev.deltaY;
-  });
-
-  mc.on("panstart", function (ev) {
-    mouse.dragging = true;
-  })
-
-  mc.on("panend", function (ev) {
-    mouse.dragging = false;
-    resetMouse();
-  })
-});
-
-Engine.preUpdate(function () {
-  if (mouse.dragging) {
-    mouse.deltaX = mouse.totalX - mouse.movedX;
-    mouse.deltaY = mouse.totalY - mouse.movedY;
-    mouse.movedX = mouse.totalX;
-    mouse.movedY = mouse.totalY;
-  }
-});
 
 window.CharacterController = function(params) {
   this.mesh = params.mesh;
@@ -116,10 +18,15 @@ window.CharacterController = function(params) {
     if (delta == undefined) {delta = 1;}
 
     var x = 0, y = 0;
-    if (keys.up && !band.up){y -= 1;}
-    if (keys.down && !band.down){y += 1;}
-    if (keys.left && !band.left){x -= 1;}
-    if (keys.right && !band.right){x += 1;}
+    if (Input.keys.up && !band.up){y -= 1;}
+    if (Input.keys.down && !band.down){y += 1;}
+    if (Input.keys.left && !band.left){x -= 1;}
+    if (Input.keys.right && !band.right){x += 1;}
+
+    if (Input.joystick.touch.active) {
+      x = Input.joystick.touch.x / Input.joystick.width;
+      y = Input.joystick.touch.y / Input.joystick.height;
+    }
 
     if (x != 0 || y != 0) {
       // atan2: función trigonométrica para convertir coordenadas cartesianas
