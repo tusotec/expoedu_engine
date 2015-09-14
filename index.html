@@ -17,51 +17,84 @@
   <script type="text/javascript" src="input_manager.js"></script>
   <script type="text/javascript" src="character_controller.js"></script>
 
-  <!--
-  <script type="text/javascript" src="http://chandlerprall.github.io/Physijs/physi.js"></script>
-  <script type="text/javascript" src="http://chandlerprall.github.io/Physijs/examples/js/stats.js"></script>S
-  <script type="text/javascript" src="physijs_worker.js"></script>
-  <script type="text/javascript" src="ammo.js"></script>
-  -->
-
-  <script id="vertexShader" type="x-shader/x-vertex">
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix *
-          modelViewMatrix * vec4(position, 1.0 );
-  }
-</script>
-
-<script id="fragmentShader" type="x-shader/x-fragment">
-  precision highp float;
-  varying vec2 vUv;
-  uniform sampler2D colTex;
-  uniform sampler2D shadTex;
-  void main(void) {
-    gl_FragColor = texture2D(colTex, vUv) * texture2D(shadTex, vUv);
-  }
-</script>
+  <link rel="stylesheet" type="text/css" href="main.css">
 
 </head>
 <body id="body">
-<h1>Prueba de Three JS</h1>
-<div id="renderDiv"></div>
-<div id="myElement" style="background-color:#cccccc;height:200px;width:200px;overflow:hidden;">
-  <div style="background-color:#888888;height:4%;width:4%;margin:48%;"></div>
+<h1>Expoedu Virtual</h1>
+<div id="gameContent">
+  <div id="joystick"><div></div></div>
+  <div id="renderDiv"></div>
 </div>
-<p>Dragging: <span id="draggingSpan"></span></p>
-<p>DeltaX: <span id="deltax"></span></p>
-<p>DeltaY: <span id="deltay"></span></p>
+
+
+<div id="image-div" hidden>
+  <style type="text/css">
+    #image-main {
+      width: 500px;
+      height: 500px;
+      position:relative;
+    }
+    #image-cursor {
+      width:10px;height:10px;background:#00ff00;position:absolute;z-index:20;
+    }
+    #image-cursor div {
+      width:6px;height:6px;top:2px;left:2px;background:#0000ff;position:relative;
+    }
+    #image-main img {
+      width:100%; height:100%;
+    }
+  </style>
+  <div id="image-main">
+    <div id="image-cursor">
+      <div></div>
+    </div>
+    <img src="textures/diff01.png">
+  </div>
+  X:<input id="xin">
+  Y:<input id="yin">
+  <button onclick="apply()">Buscar Coordenadas</button>
+  <script type="text/javascript">
+    console.log("Hola Mundo!");
+
+    function apply (xa, ya) {
+      if (xa == undefined) {
+        xa = Number(xin.value);
+      }
+      if (ya == undefined) {
+        ya = Number(yin.value);
+      }
+      var x = (xa);
+      var y = 1-(ya);
+      x = Math.floor(x*500);
+      y = Math.floor(y*500);
+      //console.log({x, y});
+      var cursor = document.getElementById("image-cursor");
+      cursor.style.left = (x-5) + "px";
+      cursor.style.top = (y-5) + "px";
+    }
+  </script>
+</div>
+
 <p>
-<strong>Controles:</strong>
+<strong>Controles:</strong><br/>
+<strong>PC:</strong>
 Para moverse, usar las teclas W, A, S y D, o las flechas.
-Para mover la cámara, arrastrar con el mouse sobre el juego.
+Para mover la cámara, arrastrar con el mouse sobre el juego.<br/>
+<strong>Móvil:</strong>
+Para mover la cámara, arrastrar sobre la pantalla del juego.
+Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
 </p>
-<p>Distancia: <span id="distanceSpan"></span></p>
+
+<p hidden>Distancia: <span id="distanceSpan"></span></p>
+
 
 </body>
 <script type="text/javascript">
+
+  var modelos = [
+    //{url: "stand01.js", occ: "textures/occ01.png"}
+  ]
 
   Engine.init({container: renderDiv, fps: 15});
 
@@ -78,7 +111,83 @@ Para mover la cámara, arrastrar con el mouse sobre el juego.
   var velocidadDesplazamiento = 0.3;
   var loaded = false
 
-  //*/ Modelo simple de la Expo
+  //*/ Cargador de la expo por partes
+    var loader = new THREE.JSONLoader();
+
+    function loadObject (modelo) {
+      var occ = THREE.ImageUtils.loadTexture(modelo.occ)
+      loader.load(modelo.url, function(obj, mats) {
+        var mat = new THREE.MeshFaceMaterial(mats);
+
+        for (var i = 0; i < mats.length; i++) {
+          var xmat = mats[i];
+          //xmat.color.setRGB(1,1,1)
+          xmat.map = xmat.lightMap;
+          //xmat.lightMap = undefined;
+          xmat.lightMap = occ;
+          var map = xmat.map;
+          map.wrapT = THREE.RepeatWrapping;
+          map.wrapS = THREE.RepeatWrapping;
+        }
+
+        model = new THREE.Mesh(obj, mat);
+        Engine.scene.add(model);
+      });
+    }
+
+    for (var i = 0; i < modelos.length; i++) {
+      loadObject(modelos[i]);
+    }
+  //*/
+
+  function loadStand (url, myFunc) {
+    var loader = new THREE.JSONLoader();
+    loader.load(url, function(obj, mats) {
+        var mat = new THREE.MeshFaceMaterial(mats);
+        model = new THREE.Mesh(obj, mat);
+        myFunc(model);
+    });
+  }
+
+  var stand = null;
+  loadStand("stand01.js", function (model) {
+    stand = model;
+    Engine.scene.add(model);
+  });
+
+  var mouseVector = new THREE.Vector2();
+  var caster = new THREE.Raycaster();
+  var arrow = new THREE.ArrowHelper(caster.ray.direction, new THREE.Vector3(0,0,0), 10);
+  Engine.scene.add(arrow);
+
+  var clickData = {};
+
+  Input.onclick = function (dt) {
+    mouseVector.set(dt.x, -dt.y);
+    //mouseVector.set(0, 0);
+    caster.setFromCamera(mouseVector, Engine.camera);
+    arrow.position.copy(caster.ray.origin);
+    arrow.setDirection(caster.ray.direction);
+    var intersects = caster.intersectObjects( [stand] );
+    if (intersects.length > 0) {
+      var intersect = intersects[0];
+      var object = intersect.object;
+      var index = intersect.faceIndex;
+      var allUvs = object.geometry.faceVertexUvs[0];
+      var uvs = allUvs[index];
+      clickData.intersect = intersect;
+      clickData.uvs = uvs;
+      var textureCoords = {
+        x: (uvs[0].x + uvs[1].x + uvs[2].x)/3,
+        y: (uvs[0].y + uvs[1].y + uvs[2].y)/3,
+      };
+      clickData.coords = textureCoords;
+      //console.log(textureCoords);
+      apply(textureCoords.x, textureCoords.y);
+    }
+  }
+
+  /*/ Modelo simple de la Expo
     var loader = new THREE.OBJMTLLoader();
     loader.load( 'fachada/fachada.obj', 'fachada/fachada.mtl', function ( object ) {
 
@@ -108,20 +217,6 @@ Para mover la cámara, arrastrar con el mouse sobre el juego.
   //*/
 
   //--------------------------------------------------------------------------------
-
-  /*/ Añadir Stands
-    LoadStand("stand01.js", "textures/diff01.png",
-              "textures/occ01.png", function (obj) {
-      stand01 = obj;
-      setLoaded();
-    });
-
-    LoadStand("stand02.js", "textures/diff02.png",
-              "textures/occ02.png", function (obj) {
-      stand02 = obj;
-      setLoaded();
-    });
-  //*/
 
   addCube();
 

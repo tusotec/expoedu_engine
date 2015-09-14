@@ -19,6 +19,13 @@ window.Input = {
   },
   "direction": {
     "x": 0, "y": 0
+  },
+  "click": {
+    "active": false,
+    "x": 0, "y": 0
+  },
+  "onclick": function (dt) {
+    console.log("clicked!! at: " + dt.x + ", " + dt.y);
   }
 };
 
@@ -90,6 +97,11 @@ var resetMouse = function () {
 
 Engine.onInit(function () {
   var mc = new Hammer(Engine.canvas);
+  var dims = {
+    "pos": {"x": 0, "y": 0},
+    "center": {"x": 0, "y": 0},
+    "width": 0, "height": 0
+  };
   mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
   mc.on("panmove", function(ev) {
@@ -107,6 +119,23 @@ Engine.onInit(function () {
     mouse.dragging = false;
     resetMouse();
   })
+
+  mc.on("tap", function (ev) {
+    getDimensions();
+    Input.click.x = 2*(ev.center.x - dims.center.x)/dims.width;
+    Input.click.y = 2*(ev.center.y - dims.center.y)/dims.height;
+    Input.onclick(Input.click);
+  })
+
+  function getDimensions() {
+    var box = Engine.canvas.getBoundingClientRect();
+    dims.pos.x = box.left;
+    dims.pos.y = box.top;
+    dims.width = box.right - box.left;
+    dims.height = box.bottom - box.top;
+    dims.center.x = dims.pos.x + (dims.width / 2);
+    dims.center.y = dims.pos.y + (dims.height / 2);
+  }
 });
 
 Engine.preUpdate(function () {
@@ -127,7 +156,7 @@ Engine.preUpdate(function () {
 // cambian dependiendo del scroll.
 
 Engine.onInit(function () {
-  var myElement = document.getElementById('myElement');
+  var myElement = document.getElementById('joystick');
   var joystick = Input.joystick;
 
   var mc = new Hammer(myElement);
@@ -138,20 +167,13 @@ Engine.onInit(function () {
 
     joystick.touch.x = ev.center.x - joystick.center.x;
     joystick.touch.y = ev.center.y - joystick.center.y;
-
-    deltax.textContent = joystick.touch.x;
-    deltay.textContent = joystick.touch.y;
   });
 
   mc.on("panstart", function(ev) {
     joystick.touch.active = true;
-    draggingSpan.textContent = "True";
   });
   mc.on("panend", function(ev) {
     joystick.touch.active = false;
-    draggingSpan.textContent = "False";
-    deltax.textContent = 0;
-    deltay.textContent = 0;
   });
 
   // Todas las coordenadas están en Window Space.
