@@ -11,7 +11,9 @@ window.Engine = {
   _functions: {
     init: [],
     preUpdate: []
-  }
+  },
+  webgl: true,
+  mobile:false
 };
 
 var defaultParams = {
@@ -19,18 +21,38 @@ var defaultParams = {
   height: 480,
   near: 0.1,
   far: 1000,
-  fps: 0
+  fps: 0,
+  webgl: true,
+  mobile: false
 };
 
-window.Engine.init = function (params) {
-  if (params == undefined) { params = {}; }
-  var width = params.width || defaultParams.width;
-  var height = params.height || defaultParams.height;
-  var near = params.near || defaultParams.near;
-  var far = params.far || defaultParams.far;
+function extend (obj1, obj2) {
+  function addObj (a, b) {
+    if (b) {
+      for (var i in b) {
+        a[i] = b[i];
+      }
+    }
+  }
+  var nobj = {};
+  addObj(nobj, obj1);
+  addObj(nobj, obj2);
+  return nobj;
+}
 
-  this.fps = params.fps || defaultParams.fps;
+window.Engine.setSize = function (width, height) {
+  this.renderer.setSize(width, height);
+  //this.camera
+}
 
+window.Engine.init = function (inparams) {
+  var params = extend(defaultParams, inparams);
+  var width = params.width, height = params.height;
+
+  this.fps = params.fps;
+
+  //this.renderer = new THREE.CanvasRenderer();
+  //this.renderer = new THREE.SoftwareRenderer();
   this.renderer = new THREE.WebGLRenderer();
   this.renderer.setSize(width, height);
 
@@ -42,15 +64,15 @@ window.Engine.init = function (params) {
 
   this.scene = new THREE.Scene();
 
-  //this.light = new THREE.AmbientLight(0xffffff);
   this.ambient = new THREE.AmbientLight(0xffffff);
   this.sun = new THREE.DirectionalLight(0xffffff, 1);
   this.sun.position.set(1, 5, 1)
 
   this.scene.add(this.ambient);
-  this.scene.add(this.sun);
+  //this.scene.add(this.sun);
 
-  this.camera = new THREE.PerspectiveCamera(45, width/height, near, far);
+  this.camera = new THREE.PerspectiveCamera(
+    45, width/height, params.near, params.far);
 
   this.clock = new THREE.Clock();
 
@@ -72,6 +94,14 @@ var renderFunc = function() {
 }
 
 window.Engine.render = function() {
+  if (this.running) {
+    if (this.fps > 0) {
+      setTimeout(function () {requestAnimationFrame(renderFunc);}, 1000/this.fps);
+    } else {
+      requestAnimationFrame(renderFunc);
+    }
+  }
+
   var delta = this.clock.getDelta();
   
   for (var i = 0; i < this._functions.preUpdate.length; i++) {
@@ -81,13 +111,6 @@ window.Engine.render = function() {
   this.update(delta);
 
   this.renderer.render(this.scene, this.camera);
-  if (this.running) {
-    if (this.fps > 0) {
-      setTimeout(function () {requestAnimationFrame(renderFunc);}, 1000/this.fps);
-    } else {
-      requestAnimationFrame(renderFunc);
-    }
-  }
 }
 
 window.Engine.setFps = function (value) {this.fps = value;}
