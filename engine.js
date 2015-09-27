@@ -1,5 +1,6 @@
 window.Engine = {
   canvas: null,
+  container: null,
   renderer: null,
   scene: null,
   camera: null,
@@ -10,11 +11,16 @@ window.Engine = {
   fps: 0,
   _functions: {
     init: [],
-    preUpdate: []
+    preUpdate: [],
+    load: []
   },
   webgl: true,
-  mobile:false
+  mobile:false,
+  loader: null,
+  loads: []
 };
+
+window.Engine.loader = new THREE.JSONLoader();
 
 var defaultParams = {
   width: 640,
@@ -42,7 +48,14 @@ function extend (obj1, obj2) {
 
 window.Engine.setSize = function (width, height) {
   this.renderer.setSize(width, height);
-  //this.camera
+  this.camera.aspect = width / height;
+  this.camera.updateProjectionMatrix();
+}
+
+function onResize () {
+  var width = Engine.container.clientWidth;
+  var height = Engine.container.clientHeight;
+  Engine.setSize(width, height);
 }
 
 window.Engine.init = function (inparams) {
@@ -57,6 +70,7 @@ window.Engine.init = function (inparams) {
   this.renderer.setSize(width, height);
 
   this.canvas = this.renderer.domElement;
+  this.container = params.container;
 
   if (params.container) {
     params.container.appendChild(this.canvas);
@@ -76,6 +90,8 @@ window.Engine.init = function (inparams) {
 
   this.clock = new THREE.Clock();
 
+  window.addEventListener("resize", onResize);
+
   for (var i = 0; i < this._functions.init.length; i++) {
     this._functions.init[i]();
   }
@@ -89,28 +105,25 @@ window.Engine.preUpdate = function (func) {
   this._functions.preUpdate.push(func);
 }
 
-var renderFunc = function() {
-  window.Engine.render();
-}
-
 window.Engine.render = function() {
-  if (this.running) {
-    if (this.fps > 0) {
-      setTimeout(function () {requestAnimationFrame(renderFunc);}, 1000/this.fps);
+  var eng = window.Engine;
+  if (eng.running) {
+    if (eng.fps > 0) {
+      setTimeout(function () {requestAnimationFrame(eng.render);}, 1000/eng.fps);
     } else {
       requestAnimationFrame(renderFunc);
     }
   }
 
-  var delta = this.clock.getDelta();
+  var delta = eng.clock.getDelta();
   
-  for (var i = 0; i < this._functions.preUpdate.length; i++) {
-    this._functions.preUpdate[i]();
+  for (var i = 0; i < eng._functions.preUpdate.length; i++) {
+    eng._functions.preUpdate[i]();
   }
 
-  this.update(delta);
+  eng.update(delta);
 
-  this.renderer.render(this.scene, this.camera);
+  eng.renderer.render(eng.scene, eng.camera);
 }
 
 window.Engine.setFps = function (value) {this.fps = value;}
@@ -119,7 +132,60 @@ window.Engine.pause = function () {
   this.running = false;
 }
 
+window.Engine.jsonLoad = function (url, callback) {
+  myfun = function (endf) {
+    window.Engine.loader.load(url, function (geom, mats) {
+      callback(geom, mats);
+      endf();
+    });
+  }
+  window.Engine.loads.push(myfun);
+}
+
+window.Engine.objloader = new THREE.OBJLoader();
+
+window.Engine.objLoad = function (url, material, callback) {
+  myfun = function (endf) {
+    window.Engine.objloader.load(url, material, function (object) {
+      callback(object);
+      endf();
+    });
+  }
+  window.Engine.loads.push(myfun);
+}
+
+window.Engine.ajaxLoad = function (url, callback) {
+
+}
+
+window.Engine.onLoad = function (f) {
+  this._functions.load.push(f);
+}
+
+window.Engine.loadUpdate = function (loaded, toLoad) {
+  console.log("loaded: " + loaded + "/" + toLoad);
+}
+
+window.Engine.loadAll = function () {
+  var loaded = 0;
+  var loads = window.Engine.loads;
+  var toLoad = loads.length;
+  var lfun = function () {
+    loaded += 1;
+    window.Engine.loadUpdate(loaded, toLoad);
+    if (loaded >= toLoad) {
+      for (var i = 0; i < window.Engine._functions.load.length; i++) {
+        window.Engine._functions.load[i]();
+      }
+    }
+  }
+  for (var i = 0; i < loads.length; i++) {
+    loads[i](lfun);
+  }
+}
+
 window.Engine.start = function () {
+  onResize();
   if (!this.running) {
     this.running = true;
     this.render();

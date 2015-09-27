@@ -2,12 +2,13 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Prueba de Three JS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expo Virtual Demo</title>
   <script type="text/javascript" src="js/three.js"></script>
 
   <!-- Importadores -->
   <script type="text/javascript" src="js/OBJMTLLoader.js"></script>
-  <script type="text/javascript" src="js/OBJLoader.js"></script>
+  <script type="text/javascript" src="js/MyOBJLoader.js"></script>
   <script  type="text/javascript" src="js/MTLLoader.js"></script>
 
   <!-- Alternative Renderers -->
@@ -23,13 +24,40 @@
   <script type="text/javascript" src="input_manager.js"></script>
   <script type="text/javascript" src="character_controller.js"></script>
 
+  <script type="text/javascript" src="modelos_stand.js"></script>
+
   <link rel="stylesheet" type="text/css" href="main.css">
 
 </head>
 <body id="body">
-<h1>Expoedu Virtual</h1>
 <div id="gameContent">
-  <div id="joystick"><div></div></div>
+  <div id="hud">
+    <h1>Expo Virtual Demo</h1>
+    <div id="help">
+      <span id="loadSpan"></span>
+      <a href="javascript:Engine.pause()">Pausa</a>
+      <div hidden>
+        <p>
+          <button onclick="loadFunc()">Load Stands</button>
+          Start: <input id="startSpan">
+          Amount: <input id="amountSpan">
+          <button onclick="removeStands()">Remove Stands</button>
+        </p>
+      </div>
+      <p id="controlDiv">
+        <strong>Controles:</strong>
+        <a href="javascript:controlDiv.hidden = true">Esconder</a>
+        <br/>
+        <strong>PC:</strong>
+        Para moverse, usar las teclas W, A, S y D, o las flechas.
+        Para mover la cámara, arrastrar con el mouse sobre el juego.<br/>
+        <strong>Móvil:</strong>
+        Para mover la cámara, arrastrar sobre la pantalla del juego.
+        Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
+      </p>
+    </div>
+    <div id="joystick"> <div/> </div>
+  </div>
   <div id="renderDiv"></div>
 </div>
 
@@ -81,15 +109,7 @@
   </script>
 </div>
 
-<p>
-<strong>Controles:</strong><br/>
-<strong>PC:</strong>
-Para moverse, usar las teclas W, A, S y D, o las flechas.
-Para mover la cámara, arrastrar con el mouse sobre el juego.<br/>
-<strong>Móvil:</strong>
-Para mover la cámara, arrastrar sobre la pantalla del juego.
-Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
-</p>
+
 
 <p hidden>Distancia: <span id="distanceSpan"></span></p>
 
@@ -98,10 +118,31 @@ Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
 <script type="text/javascript">
 
   var modelos = [
-    //{url: "stand01.js", occ: "textures/occ01.png"}
+    {url: "expo/ext_bloques_edificio.json", occ: "expo/ext_bloques_occ.jpg"},
+    {url: "expo/ext_arcos_edificio.json", occ: "expo/ext_arcos_occ.jpg"},
+    {url: "expo/ext_cielo.json", occ: "expo/ext_cielo_occ.jpg"},
+    {url: "expo/ext_fondo_ciudad_lateral.json", occ: "expo/ext_fondo_ciudad_lateral_occ.jpg", x:1, y:1, z:1},
+    {url: "expo/ext_fondo_ciudad.json", occ: "expo/ext_fondo_ciudad_occ.jpg", x:1, y:1, z:1},
+    {url: "expo/pab_pared_techo.json", occ: "expo/pab_pared_techo_occ.jpg"},
+    {url: "expo/ext_techos_rojos_edificio.json", occ: "expo/ext_techos_rojos_occ.jpg"},
+    {url: "expo/ext_piso_exterior.json", occ: "expo/ext_piso_exterior_occ.jpg"},
+    {url: "expo/ext_logo.json", occ: "expo/ext_logo_occ.jpg"},
+    {url: "expo/ext_jardines.json", occ: "expo/ext_jardines_occ.jpg"},
+    {url: "expo/ext_pendones.json", occ: "expo/ext_pendones_occ.jpg"},
+    {url: "expo/ext_edf01.json", occ: "expo/ext_edf01_occ.jpg"},
+    {url: "expo/ext_edf02.json", occ: "expo/ext_edf01_occ.jpg"},
+    {url: "expo/pab_estructura_techo.json", occ: "expo/ext_cielo_occ.jpg"},
+    {url: "expo/ext_vidrios_edificio_2.json", occ: "expo/ext_vidrios_occ.jpg"},
+    {url: "expo/ext_vidrios_edificio.json", occ: "expo/ext_vidrios_occ.jpg"},
+    {url: "expo/ext_torres_publicidad.json", occ: "expo/ext_torres_publicidad_occ.jpg"},
+    {url: "expo/ext_postes.json", occ: "expo/ext_postes_occ.jpg"},
+    {url: "expo/ext_piso_entrada.json", occ: "expo/ext_piso_entrada_occ.jpg"},
+    {url: "expo/pab_piso.json", occ: "expo/pab_piso_occ.jpg"},
+    //{ url: "salud/expo_stand_bronce.obj", type: "obj",
+    //  diff: "salud/expo_stand_bronce_diff.jpg", occ: "salud/expo_stand_bronce_occ.jpg"},
   ]
 
-  Engine.init({container: renderDiv, fps: 15});
+  Engine.init({container: renderDiv, fps: 15, width: 1024, height: 720});
 
   var boxGeom = new THREE.BoxGeometry(0.5,1.6,0.5);
   var boxMat = new THREE.MeshBasicMaterial({color:0x0000ff});
@@ -119,31 +160,155 @@ Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
   //*/ Cargador de la expo por partes
     var loader = new THREE.JSONLoader();
 
+    var defaultLoaderFunc = function (model) {
+      Engine.scene.add(model);
+    }
+
     function loadObject (modelo) {
-      var occ = THREE.ImageUtils.loadTexture(modelo.occ)
-      loader.load(modelo.url, function(obj, mats) {
+      //var occ = THREE.ImageUtils.loadTexture(modelo.occ)
+      modelo.type = modelo.type || "json";
+      var diff = THREE.ImageUtils.loadTexture(modelo.diff);
+      var occ = modelo.occ ? THREE.ImageUtils.loadTexture(modelo.occ) : undefined;
+      if (modelo.type == "obj") {
+        var mat = new THREE.MeshPhongMaterial({
+          map: diff,
+          lightMap: occ
+        });
+        Engine.objLoad(modelo.url, mat, function (obj) {
+          window.loadedObj = obj;
+          Engine.scene.add(obj);
+        })
+      } else {
+        Engine.jsonLoad(modelo.url, function(obj, mats) {
+          var mat = new THREE.MeshFaceMaterial(mats);
+
+          for (var i = 0; i < mats.length; i++) {
+            var xmat = mats[i];
+            xmat.color.setRGB(1,1,1)
+            xmat.map = xmat.lightMap;
+            //xmat.lightMap = undefined;
+            xmat.lightMap = occ;
+            var map = xmat.map;
+            map.wrapT = THREE.RepeatWrapping;
+            map.wrapS = THREE.RepeatWrapping;
+          }
+
+          model = new THREE.Mesh(obj, mat);
+          model.position.set(modelo.x || 0, modelo.y || 0, modelo.z || 0);
+          var func = modelo.func || defaultLoaderFunc;
+          func(model);
+        });
+      }
+    }
+
+    for (var i = 0; i < modelos.length; i++) {
+      loadObject(modelos[i]);
+    }
+
+    var tipos_stands = {};
+    function loadTipoStand (nombre) {
+      var url = "stands/std_"+nombre+".json";
+      var occ = THREE.ImageUtils.loadTexture("stands/occ_"+nombre+".jpg");
+      Engine.jsonLoad(url , function(obj, mats) {
+        var mat = new THREE.MeshFaceMaterial(mats);
+        obj.faceVertexUvs[1] = obj.faceVertexUvs[0];
+        for (var i = 0; i < mats.length; i++) {
+          var xmat = mats[i];
+          xmat.color.setRGB(1,1,1);
+          xmat.map = xmat.lightMap;
+          //xmat.lightMap = undefined;
+          //xmat.aoMap = occ;
+          xmat.lightMap = occ;
+        }
+
+        tipos_stands[nombre] = {
+          "name": nombre,
+          "geom": obj,
+          "mat": mat
+        }
+      });
+    }
+    for (var i = 0; i < tipos_stand_nombres.length; i++) {
+      loadTipoStand(tipos_stand_nombres[i]);
+    }
+
+    function myStand (modelo) {
+      Engine.jsonLoad(modelo.url, function(obj, mats) {
         var mat = new THREE.MeshFaceMaterial(mats);
 
         for (var i = 0; i < mats.length; i++) {
           var xmat = mats[i];
           //xmat.color.setRGB(1,1,1)
           xmat.map = xmat.lightMap;
-          //xmat.lightMap = undefined;
-          xmat.lightMap = occ;
-          var map = xmat.map;
-          map.wrapT = THREE.RepeatWrapping;
-          map.wrapS = THREE.RepeatWrapping;
+          xmat.lightMap = undefined;
+          //xmat.lightMap = occ;
         }
 
         model = new THREE.Mesh(obj, mat);
+        model.position.set(modelo.px || 0, modelo.py || 0, modelo.pz || 0);
+        model.rotateY(modelo.ry || 0);
         Engine.scene.add(model);
       });
     }
 
-    for (var i = 0; i < modelos.length; i++) {
-      loadObject(modelos[i]);
+    var stands = []
+
+    function loadStands (start, amount) {
+      for (var i = start; i < (start+amount); i++) {
+        //myStand(modelos_stand[i]);
+        var modelo = modelos_stand[i];
+        var tipo = tipos_stands[modelo.tipo];
+        var st = new THREE.Mesh(tipo.geom, tipo.mat);
+        st.position.set(modelo.px || 0, modelo.py || 0, modelo.pz || 0);
+        st.rotateY(modelo.ry || 0);
+        stands.push(st);
+        Engine.scene.add(st);
+      }
+    }
+
+    Engine.onLoad( function(){ loadStands(0,30); } );
+    
+
+    function removeStands () {
+      for (var i = 0; i < stands.length; i++) {
+          Engine.scene.remove(stands[i]);
+      }
+      stands.splice(0, stands.length);
+    }
+
+    function loadFunc () {
+      var start = parseInt(startSpan.value);
+      var amount = parseInt(amountSpan.value);
+      loadStands(start, amount);
     }
   //*/
+
+
+  //*/ Cargar Robot y personajes
+  var robot;
+  var botgeom;
+  var botloader = new THREE.JSONLoader();
+  var animations;
+  var controller;
+  Engine.jsonLoad("expo/virtual_bot.json", function(geom, mats) {
+    botgeom = geom;
+    var mat = new THREE.MeshFaceMaterial(mats);
+    for (var i = 0; i < mats.length; i++) {
+      mats[i].skinning = true;
+    }
+    mat.skinning = true;
+    geom.faceVertexUvs[1] = geom.faceVertexUvs[0]
+    robot = new THREE.SkinnedMesh(geom, mat);
+    var rAnimations = geom.animations.map(function (x) {
+      return new THREE.Animation(robot, x);
+    });
+    robot.scale.set(0.8,0.8,0.8);
+    Engine.scene.add(robot);
+    controller = new CharacterController({
+      mesh: robot, cam: Engine.camera, animations: rAnimations,
+      velocity: 3, distance: 4, yOff: 0.8});
+    Engine.scene.add(robot);
+    });
 
   function loadStand (url, myFunc) {
     var loader = new THREE.JSONLoader();
@@ -157,7 +322,7 @@ Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
   var stand = null;
   loadStand("stand01.js", function (model) {
     stand = model;
-    Engine.scene.add(model);
+    //Engine.scene.add(model);
   });
 
   var mouseVector = new THREE.Vector2();
@@ -223,7 +388,7 @@ Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
 
   //--------------------------------------------------------------------------------
 
-  addCube();
+  //addCube();
 
 /*
   var caster = new THREE.Raycaster();
@@ -251,14 +416,21 @@ Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
   Engine.scene.add(arrowRight);
   */
 
-  var controller = new CharacterController({mesh: cube, cam: Engine.camera, velocity: 3, distance: 4});
+  var cube = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5,1.6,0.5), 
+    new THREE.MeshBasicMaterial({color:0x0000ff})
+  );
+  var controller = new CharacterController({mesh: cube, cam: Engine.camera, velocity: 3, distance: 4, yOff: 1});
        var k = 0;
   function render(delta) {
     //eventosKey();
 
-    controller.updatePosition(delta);
-    controller.updateMouse();
-    controller.updateCamera();
+    if (controller) {
+      controller.updatePosition(delta);
+      controller.updateMouse();
+      controller.updateCamera();
+      controller.updateAnimations(delta);
+    }
 
     /*
     ray.x = Math.sin(cube.rotation.y);
@@ -329,7 +501,12 @@ Para moverse, arrastrar sobre el joystick en la esquina inferior derecha.
   }
 
   Engine.update = render;
-  Engine.start();
+  Engine.loadUpdate = function (loaded, toLoad) {
+    loadSpan.textContent = "loaded: " + loaded + "/" + toLoad;
+  }
+  Engine.onLoad(function () { Engine.start(); });
+  Engine.loadAll();
+  
 
 
 </script>
