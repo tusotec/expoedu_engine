@@ -117,7 +117,15 @@
 </body>
 <script type="text/javascript">
 
-  var modelos = [
+  var getParams = {}
+  location.search.substr(1).split("&").forEach( function(x) {
+    var sts = x.split("=");
+    getParams[sts[0]] = sts[1];
+  });
+
+  var lightExpo = "light" in getParams;
+
+  var modelos_all = [
     {url: "expo/ext_bloques_edificio.json", occ: "expo/ext_bloques_occ.jpg"},
     {url: "expo/ext_arcos_edificio.json", occ: "expo/ext_arcos_occ.jpg"},
     {url: "expo/ext_cielo.json", occ: "expo/ext_cielo_occ.jpg"},
@@ -142,14 +150,23 @@
     //  diff: "salud/expo_stand_bronce_diff.jpg", occ: "salud/expo_stand_bronce_occ.jpg"},
   ]
 
+  var modelos_light = [
+    {url: "expo/ext_bloques_edificio.json", occ: "expo/ext_bloques_occ.jpg"},
+    {url: "expo/ext_arcos_edificio.json", occ: "expo/ext_arcos_occ.jpg"},
+    {url: "expo/pab_estructura_techo.json", occ: "expo/ext_cielo_occ.jpg"},
+    {url: "expo/ext_vidrios_edificio_2.json", occ: "expo/ext_vidrios_occ.jpg"},
+    {url: "expo/ext_vidrios_edificio.json", occ: "expo/ext_vidrios_occ.jpg"},
+    {url: "expo/ext_piso_entrada.json", occ: "expo/ext_piso_entrada_occ.jpg"},
+    {url: "expo/pab_piso.json", occ: "expo/pab_piso_occ.jpg"},
+  ]
+
+  var modelos = lightExpo? modelos_light : modelos_all;
+
   Engine.init({container: renderDiv, fps: 15, width: 1024, height: 720});
 
   var boxGeom = new THREE.BoxGeometry(0.5,1.6,0.5);
   var boxMat = new THREE.MeshBasicMaterial({color:0x0000ff});
   var cube = new THREE.Mesh(boxGeom, boxMat);
-  cube.position.y = 0.8;
-  cube.position.x = 10;
-  cube.position.z = 10;
 
   var stand01;
   var stand02;
@@ -208,7 +225,11 @@
     var tipos_stands = {};
     function loadTipoStand (nombre) {
       var url = "stands/std_"+nombre+".json";
-      var occ = THREE.ImageUtils.loadTexture("stands/occ_"+nombre+".jpg");
+      if (nombre.startsWith("bro")) {
+        var occ = THREE.ImageUtils.loadTexture("stands/occ_"+nombre+".jpg");
+      } else {
+        var occ = undefined;
+      }
       Engine.jsonLoad(url , function(obj, mats) {
         var mat = new THREE.MeshFaceMaterial(mats);
         obj.faceVertexUvs[1] = obj.faceVertexUvs[0];
@@ -266,7 +287,16 @@
       }
     }
 
-    Engine.onLoad( function(){ loadStands(0,30); } );
+    Engine.onLoad( function(){
+      var num = undefined;
+      if ("stands" in getParams) {
+        if (isFinite(getParams.stands)) {
+          num = getParams.stands;
+        }
+      }
+      if (num == undefined) {num = 30;}
+      loadStands(0,num);
+    });
     
 
     function removeStands () {
@@ -290,25 +320,32 @@
   var botloader = new THREE.JSONLoader();
   var animations;
   var controller;
-  Engine.jsonLoad("expo/virtual_bot.json", function(geom, mats) {
-    botgeom = geom;
-    var mat = new THREE.MeshFaceMaterial(mats);
-    for (var i = 0; i < mats.length; i++) {
-      mats[i].skinning = true;
-    }
-    mat.skinning = true;
-    geom.faceVertexUvs[1] = geom.faceVertexUvs[0]
-    robot = new THREE.SkinnedMesh(geom, mat);
-    var rAnimations = geom.animations.map(function (x) {
-      return new THREE.Animation(robot, x);
-    });
-    robot.scale.set(0.8,0.8,0.8);
-    Engine.scene.add(robot);
-    controller = new CharacterController({
-      mesh: robot, cam: Engine.camera, animations: rAnimations,
-      velocity: 3, distance: 4, yOff: 0.8});
-    Engine.scene.add(robot);
-    });
+
+  if (lightExpo) {
+    controller = new CharacterController({mesh: cube, cam: Engine.camera,
+      velocity: 3, distance: 4, yOff: 1});
+    var k = 0;
+  } else {
+    Engine.jsonLoad("expo/virtual_bot.json", function(geom, mats) {
+      botgeom = geom;
+      var mat = new THREE.MeshFaceMaterial(mats);
+      for (var i = 0; i < mats.length; i++) {
+        mats[i].skinning = true;
+      }
+      mat.skinning = true;
+      geom.faceVertexUvs[1] = geom.faceVertexUvs[0]
+      robot = new THREE.SkinnedMesh(geom, mat);
+      var rAnimations = geom.animations.map(function (x) {
+        return new THREE.Animation(robot, x);
+      });
+      robot.scale.set(0.8,0.8,0.8);
+      Engine.scene.add(robot);
+      controller = new CharacterController({
+        mesh: robot, cam: Engine.camera, animations: rAnimations,
+        velocity: 3, distance: 4, yOff: 0.8});
+      Engine.scene.add(robot);
+      });
+  }
 
   function loadStand (url, myFunc) {
     var loader = new THREE.JSONLoader();
@@ -415,13 +452,6 @@
   var arrowRight = new THREE.ArrowHelper(rayBack, new THREE.Vector3(0,0,0), 10);
   Engine.scene.add(arrowRight);
   */
-
-  var cube = new THREE.Mesh(
-    new THREE.BoxGeometry(0.5,1.6,0.5), 
-    new THREE.MeshBasicMaterial({color:0x0000ff})
-  );
-  var controller = new CharacterController({mesh: cube, cam: Engine.camera, velocity: 3, distance: 4, yOff: 1});
-       var k = 0;
   function render(delta) {
     //eventosKey();
 
