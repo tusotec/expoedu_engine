@@ -124,6 +124,7 @@
   });
 
   var lightExpo = "light" in getParams;
+  var software = "software" in getParams;
 
   var modelos_all = [
     {url: "expo/ext_bloques_edificio.json", occ: "expo/ext_bloques_occ.jpg"},
@@ -162,7 +163,7 @@
 
   var modelos = lightExpo? modelos_light : modelos_all;
 
-  Engine.init({container: renderDiv, fps: 15, width: 1024, height: 720});
+  Engine.init({container: renderDiv, fps: 15, width: 1024, height: 720, webgl: !software});
 
   var boxGeom = new THREE.BoxGeometry(0.5,1.6,0.5);
   var boxMat = new THREE.MeshBasicMaterial({color:0x0000ff});
@@ -355,12 +356,6 @@
         myFunc(model);
     });
   }
-
-  var stand = null;
-  loadStand("stand01.js", function (model) {
-    stand = model;
-    //Engine.scene.add(model);
-  });
 
   var mouseVector = new THREE.Vector2();
   var caster = new THREE.Raycaster();

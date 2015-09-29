@@ -63,10 +63,13 @@ window.Engine.init = function (inparams) {
   var width = params.width, height = params.height;
 
   this.fps = params.fps;
-
-  //this.renderer = new THREE.CanvasRenderer();
-  //this.renderer = new THREE.SoftwareRenderer();
-  this.renderer = new THREE.WebGLRenderer();
+  
+  if (params.webgl) {
+    this.renderer = new THREE.CanvasRenderer();
+    //this.renderer = new THREE.WebGLRenderer();
+  } else {
+    this.renderer = new THREE.SoftwareRenderer();
+  }
   this.renderer.setSize(width, height);
 
   this.canvas = this.renderer.domElement;
