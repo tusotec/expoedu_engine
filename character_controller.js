@@ -19,6 +19,18 @@ Vector.prototype = {
 
 var inputDirection = new Vector();*/
 
+function clamp (x) {
+  return x>1? 1 : (x<0? 0 : x);
+}
+
+function angleLerp (a, b, t) {
+  t = clamp(t);
+  var d = a-b;
+  if (d >  Math.PI) {a -= Math.PI*2;}
+  if (d < -Math.PI) {a += Math.PI*2;}
+  return a + t*(b-a);
+}
+
 window.CharacterController = function(params) {
   this.mesh = params.mesh;
   this.cam = params.cam;
@@ -33,7 +45,15 @@ window.CharacterController = function(params) {
   this.ySensibility = params.ySensibility || 100;
   this.characterAngle = 0;
   this.moveAngle = 0;
+  this.inputAngle = 0;
+  this.angleSmooth = params.angleSmooth || 5;
+  this.moveSmooth = params.moveSmooth || 5;
   this.currentAnim = null;
+
+  this.disableMovement = params.disableMovement || false;
+
+  this.moveAmount = 0;
+  var that = this;
 
   this.updatePosition = function (delta) {
     if (delta == undefined) {delta = 1;}
@@ -50,19 +70,25 @@ window.CharacterController = function(params) {
     }
 
     if (x != 0 || y != 0) {
-      //inputDirection.setCartesianAngle(x, y);
-      //inputDirection.magnitude = 1;
-
       // atan2: función trigonométrica para convertir coordenadas cartesianas
       // a angulos polares. En radianes.
-      this.characterAngle = Math.atan2(x, y);
-      var angle = this.characterAngle + this.yAngle;
+      this.inputAngle = Math.atan2(x, y);
+      this.moveAngle = this.inputAngle + this.yAngle;
+      var angle = angleLerp(this.characterAngle, this.moveAngle, delta*this.angleSmooth);
+      this.characterAngle = angle;
 
       this.mesh.rotation.y = angle;
+      this.moveAmount += delta * this.moveSmooth;
+    } else if (this.moveAmount > 0) {
+      this.moveAmount -= delta * this.moveSmooth;
+    }
 
+    if (this.moveAmount > 0) {
+      this.moveAmount = clamp(this.moveAmount);
       // Mover al personaje en dirección a la que miramos.
-      this.mesh.position.x += Math.sin(angle) * delta * this.velocity;
-      this.mesh.position.z += Math.cos(angle) * delta * this.velocity;
+      var speed = delta * this.velocity * this.moveAmount;
+      this.mesh.position.x += Math.sin(this.characterAngle) * speed;
+      this.mesh.position.z += Math.cos(this.characterAngle) * speed;
     }
   };
 
@@ -99,6 +125,13 @@ window.CharacterController = function(params) {
       this.currentAnim.play();
     }
     var fps = 24;
-    THREE.AnimationHandler.update(1);
+    //THREE.AnimationHandler.update(1);
+  }
+
+  this.update = function (delta) {
+    that.updatePosition(delta);
+    that.updateMouse();
+    that.updateCamera();
+    that.updateAnimations(delta);
   }
 };

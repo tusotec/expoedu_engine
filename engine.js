@@ -6,7 +6,7 @@ window.Engine = {
   camera: null,
   light: null,
   clock: null,
-  update: function () {console.log("Update loop is empty!!")},
+  update: function () {/*console.log("Update loop is empty!!");*/},
   running: false,
   fps: 0,
   _functions: {
@@ -20,8 +20,6 @@ window.Engine = {
   loads: []
 };
 
-window.Engine.loader = new THREE.JSONLoader();
-
 var defaultParams = {
   width: 640,
   height: 480,
@@ -29,7 +27,8 @@ var defaultParams = {
   far: 1000,
   fps: 0,
   webgl: true,
-  mobile: false
+  mobile: false,
+  autoResize: true
 };
 
 function extend (obj1, obj2) {
@@ -63,12 +62,12 @@ window.Engine.init = function (inparams) {
   var width = params.width, height = params.height;
 
   this.fps = params.fps;
-  
+
   if (params.webgl) {
-    this.renderer = new THREE.CanvasRenderer();
-    //this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer();
   } else {
-    this.renderer = new THREE.SoftwareRenderer();
+    this.renderer = new THREE.CanvasRenderer();
+    //this.renderer = new THREE.SoftwareRenderer();
   }
   this.renderer.setSize(width, height);
 
@@ -93,7 +92,9 @@ window.Engine.init = function (inparams) {
 
   this.clock = new THREE.Clock();
 
-  window.addEventListener("resize", onResize);
+  if (params.autoResize) {
+    window.addEventListener("resize", onResize);
+  }
 
   for (var i = 0; i < this._functions.init.length; i++) {
     this._functions.init[i]();
@@ -114,7 +115,7 @@ window.Engine.render = function() {
     if (eng.fps > 0) {
       setTimeout(function () {requestAnimationFrame(eng.render);}, 1000/eng.fps);
     } else {
-      requestAnimationFrame(renderFunc);
+      requestAnimationFrame(eng.render);
     }
   }
 
@@ -135,6 +136,8 @@ window.Engine.pause = function () {
   this.running = false;
 }
 
+window.Engine.loader = new THREE.JSONLoader();
+
 window.Engine.jsonLoad = function (url, callback) {
   myfun = function (endf) {
     window.Engine.loader.load(url, function (geom, mats) {
@@ -143,11 +146,16 @@ window.Engine.jsonLoad = function (url, callback) {
     });
   }
   window.Engine.loads.push(myfun);
+  if (Engine.running) {
+    Engine.loadAll();
+  }
 }
 
-window.Engine.objloader = new THREE.OBJLoader();
+var canLoadObj = Boolean(THREE.OBJLoader);
+window.Engine.objloader = canLoadObj? new THREE.OBJLoader() : null;
 
 window.Engine.objLoad = function (url, material, callback) {
+  if (!canLoadObj) { return; }
   myfun = function (endf) {
     window.Engine.objloader.load(url, material, function (object) {
       callback(object);
@@ -185,6 +193,7 @@ window.Engine.loadAll = function () {
   for (var i = 0; i < loads.length; i++) {
     loads[i](lfun);
   }
+  loads = [];
 }
 
 window.Engine.start = function () {

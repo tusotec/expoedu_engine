@@ -157,6 +157,7 @@ Engine.preUpdate(function () {
 
 Engine.onInit(function () {
   var myElement = document.getElementById('joystick');
+  if (!myElement) {return;}
   var joystick = Input.joystick;
 
   var mc = new Hammer(myElement);
