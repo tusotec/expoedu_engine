@@ -125,7 +125,7 @@ window.CharacterController = function(params) {
       this.currentAnim.play();
     }
     var fps = 24;
-    //THREE.AnimationHandler.update(1);
+    THREE.AnimationHandler.update(1);
   }
 
   this.update = function (delta) {

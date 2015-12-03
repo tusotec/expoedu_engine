@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expo Virtual Demo</title>
   <!-- three.js 71 -->
-  <script type="text/javascript" src="js/three.min.js"></script>
+  <script type="text/javascript" src="js/three.71.js"></script>
   <!-- Hammer.JS - v2.0.4 -->
   <script type="text/javascript" src="js/hammer.js"></script>
 
@@ -237,11 +237,12 @@
       //mat = boxMat;
       mat = mats[0];
       mat.skinning = true;
+      //mat.aoMap = mat.lightMap;
       geom.faceVertexUvs[1] = geom.faceVertexUvs[0]
       robot = new THREE.SkinnedMesh(geom, mat);
       var rAnimations = geom.animations.map(function (x) {
-        //return new THREE.Animation(robot, x);
-        return x;
+        return new THREE.Animation(robot, x);
+        //return x;
       });
       robot.scale.set(0.8,0.8,0.8);
       Engine.scene.add(robot);

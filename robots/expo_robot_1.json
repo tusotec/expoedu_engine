@@ -8359,12 +8359,14 @@
 "DbgIndex" : 0,
  "DbgName" : "default",
 "mapLight" : "expo_robot_1_occ.jpg",
+"aoMap": "expo_robot_1_occ.jpg",
 "mapDiffuse" : "expo_robot_1_diff.jpg"
  },{
  "DbgColor" : 16777215,
 "DbgIndex" : 0,
  "DbgName" : "default",
 "mapLight" : "expo_robot_1_occ.jpg",
+"aoMap": "expo_robot_1_occ.jpg",
 "mapDiffuse" : "expo_robot_1_diff.jpg"
  }],
     "bones": [{
