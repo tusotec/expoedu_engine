@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf8">
+  <title>Editor de Stands</title>
+  <script type="text/javascript" src="../engine/vendor/three_76.js"></script>
+  <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
+
+  <script type="text/javascript" src="../engine/engine.js"></script>
+  <script type="text/javascript" src="../engine/input_manager.js"></script>
+  <script type="text/javascript" src="../engine/utils.js"></script>
+
+  <script type="text/javascript" src="cameracontrol.js"></script>
+</head>
+<body>
+  <h1>Editor de Stands</h1>
+  <div id="renderDiv" style="width: 640; height:480;"></div>
+  <input type="file" id="filein">
+  <script type="text/javascript">
+
+    var Dim = function (x, y, width, height) {
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
+    }
+
+    var Editor = function (params) {
+      this.width = params.width || 512;
+      this.height = params.height || 512;
+
+      var canvas =  document.createElement("canvas");
+      this.canvas = canvas;
+      canvas.width = this.width;
+      canvas.height = this.height;
+
+      this.ctx = canvas.getContext("2d");
+
+      this.texture = new THREE.Texture(canvas);
+      this.texture.needsUpdate = true;
+    };
+
+    Editor.prototype = {
+      fillColor: function (dim, color) {
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(
+          dim.x*this.width,
+          dim.y*this.height,
+          dim.width*this.width,
+          dim.height*this.height
+        );
+        this.texture.needsUpdate = true;
+      },
+      fillImage: function (dim, img) {
+        /* #### IMPORTANTE #### /*
+          Por alguna razón, esto no funciona cuando se trata de pintar un
+          img con un src de un dominio externo.
+          Es decir, si tengo este script en la página:
+            http://abc.com/stand_editor
+          Y trato de pintar la imagen
+            http://abc.com/image01.jpeg
+          Funcionará, pero si trato de pintar la imagen
+            http://wikipedia.com/logo.jpeg
+          No va a funcionar porque no son del mismo dominio.
+          Esto se supone que es una medida de seguridad pero no la entiendo,
+          tampoco sé si es solo con firefox o con otros navegadores.
+        */
+        if (img instanceof Element &&
+            img.tagName == "INPUT") { // && img.type == "file"
+          var that = this;
+          var input = img;
+          if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              var url = e.target.result;
+              that.fillImage(dim, e.target.result)
+            }
+            reader.readAsDataURL(input.files[0]);
+          }
+          return;
+        }
+        if (typeof img == "string") {
+          that = this;
+          var url = img;
+          var img = new Image();
+          img.onload = function () {
+            that.fillImage(dim, img);
+          };
+          img.src = url;
+          return;
+        }
+        this.ctx.drawImage(
+          img,
+          dim.x*this.width,
+          dim.y*this.height,
+          dim.width*this.width,
+          dim.height*this.height
+        );
+        this.texture.needsUpdate = true;
+      }
+    };
+
+    /* Fin de clase Editor */
+
+    Engine.init({container: renderDiv, fps: 8, width: 640, height: 480, autoResize: false});
+
+    var boxStatic = new THREE.Mesh(
+      new THREE.BoxGeometry(1,1,1),
+      new THREE.MeshBasicMaterial({color:0xff0000})
+    );
+    Engine.scene.add(boxStatic);
+
+    var editor = new Editor({});
+    document.body.appendChild(editor.canvas);
+
+    //editor.fillColor(new Dim(0,0,1,1), "#00FF00");
+    editor.fillImage(new Dim(0,0,1,1), "../stands/expo_stand_bronce_diff.jpg");
+
+    filein.onchange = function () {
+      editor.fillImage(new Dim(0.1,0.1,0.8,0.8), filein);
+    }
+
+    var loader = new THREE.JSONLoader();
+    var stand;
+    loader.load("../stands/std_bronce.json", function (obj, _mat) {
+      var aoimg = new Image();
+      var aotexture = new THREE.Texture(aoimg);
+      aoimg.onload = function () { aotexture.needsUpdate = true; };
+      aoimg.src = "../stands/expo_stand_bronce_occ.jpg"
+      var mat = new THREE.MeshBasicMaterial({
+        map: editor.texture,
+        aoMap: aotexture
+      });
+      stand = new THREE.Mesh(obj, mat);
+      Engine.scene.add(stand);
+    });
+
+    Engine.CameraControl.init({distance: 10, yOffset: 2});
+
+    Engine.update = function () {
+      Engine.CameraControl.update();
+    };
+
+    Engine.start();
+  </script>
+</body>
+</html>

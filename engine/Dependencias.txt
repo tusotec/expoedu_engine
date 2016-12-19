@@ -1,0 +1,7 @@
+# Dependencias
+
+engine: Three.js[r76]
+arnalib: null
+input_manager: engine, hammer.js
+character: engine, arnalib
+user: character, engine, arnalib

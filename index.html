@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expo Virtual Demo</title>
   <!-- three.js 71 -->
-  <script type="text/javascript" src="js/three.71.js"></script>
+  <!--<script type="text/javascript" src="js/three.73.js"></script>-->
+  <script type="text/javascript" src="three_75.js"></script>
   <!-- Hammer.JS - v2.0.4 -->
   <script type="text/javascript" src="js/hammer.js"></script>
 
@@ -189,7 +190,7 @@
             //nmat.color.setRGB(1,1,1);
             nmat.map = xmat.lightMap;
             //xmat.lightMap = undefined;
-            nmat.lightMap = occ;
+            nmat.aoMap = occ;
             var map = nmat.map;
             map.wrapT = THREE.RepeatWrapping;
             map.wrapS = THREE.RepeatWrapping;
@@ -241,8 +242,8 @@
       geom.faceVertexUvs[1] = geom.faceVertexUvs[0]
       robot = new THREE.SkinnedMesh(geom, mat);
       var rAnimations = geom.animations.map(function (x) {
-        return new THREE.Animation(robot, x);
-        //return x;
+        //return new THREE.Animation(robot, x);
+        return x;
       });
       robot.scale.set(0.8,0.8,0.8);
       Engine.scene.add(robot);
@@ -315,7 +316,7 @@
   }
   Engine.onLoad(function () { Engine.start(); });
 
-  //Engine.loadAll();
+  Engine.loadAll();
   
 
 

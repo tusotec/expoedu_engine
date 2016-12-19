@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF8">
+  <title>Character Class</title>
+  <script type="text/javascript" src="../engine/vendor/three_76.js"></script>
+  <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
+  <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
+  <script type="text/javascript" src="../engine/vendor/cannon.js"></script>
+
+  <script type="text/javascript" src="../engine/engine.js"></script>
+  <script type="text/javascript" src="../engine/input_manager.js"></script>
+  <script type="text/javascript" src="../engine/utils.js"></script>
+  
+  <script type="text/javascript" src="physics.js"></script>
+  <script type="text/javascript" src="character.js"></script>
+  <script type="text/javascript" src="user.js"></script>
+  <script type="text/javascript" src="multiplayer.js"></script>
+</head>
+<body>
+  <div>
+    <input id="sizein" value="10">
+    <input id="textin">
+  </div>
+  <div id="renderDiv"></div>
+  <script type="text/javascript">
+    Engine.init({container: renderDiv, fps: 8});
+    Engine.Physics.init();
+
+    var charRadius = 0.25;
+    var charHeight = 1.6;
+
+    var boxStatic = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5,0.5,0.5),
+      new THREE.MeshBasicMaterial({color:0xff0000})
+    );
+    var box = new THREE.Mesh(
+      new THREE.CylinderGeometry(charRadius, charRadius, charHeight),
+      new THREE.MeshBasicMaterial({color:0x0000ff})
+    );
+
+    Engine.scene.add(box);
+    Engine.scene.add(boxStatic);
+
+    var character = new Engine.Character({
+      mesh: box,
+      type: Engine.Character.DYNAMIC,
+      radius: charRadius,
+      height: charHeight
+    });
+
+    Engine.User.init({character: character, velocity: 3, distance: 4, yOff: 1})
+
+    /*=== Multiplayer ===*/
+
+    /*var playergeom = new THREE.CylinderGeometry(
+      charRadius, charRadius, charHeight);
+    var playermat = new THREE.MeshBasicMaterial({color:0x00ff00});
+
+    Engine.Multiplayer.init({
+      url: "ws://localhost:3000",
+      character: character,
+      builder: function () {
+        var mesh = new THREE.Mesh(playergeom, playermat);
+        var character = new Engine.Character({
+          mesh: mesh,
+          type: Engine.Character.KINEMATIC,
+          radius: charRadius,
+          height: charHeight
+        });
+        clickables.push(mesh); // <--## Temporal ##
+        return character;
+      },
+      rate: 0.3 // 3hz aprox.
+    });*/
+
+
+    /*=== MouseOver ===*/
+
+    var clickables = [];
+    clickables.push(character.mesh);
+
+    var mouseVector = new THREE.Vector2();
+    var caster = new THREE.Raycaster();
+    var arrow = new THREE.ArrowHelper(caster.ray.direction,
+      new THREE.Vector3(0,0,0), 10);
+    //Engine.scene.add(arrow);
+
+    function castPointer (x, y) {
+      mouseVector.set(x, -y);
+      caster.setFromCamera(mouseVector, Engine.camera);
+      arrow.position.copy(caster.ray.origin);
+      arrow.setDirection(caster.ray.direction);
+      var intersects = caster.intersectObjects( clickables );
+      if (intersects.length > 0) {
+        return intersects[0];
+      } else {
+        return null;
+      }
+    }
+
+    var mouseOver = false;
+    var mousePos = {x: 0, y: 0};
+
+    renderDiv.addEventListener("mouseover", function (ev) {
+      mouseOver = true;
+    });
+    renderDiv.addEventListener("mouseout", function (ev) {
+      mouseOver = false;
+    })
+    renderDiv.addEventListener("mousemove", function (ev) {
+      if (mouseOver) {
+        var dims = getDimensions();
+        mousePos.x = 2*(ev.clientX - dims.center.x)/dims.width;
+        mousePos.y = 2*(ev.clientY - dims.center.y)/dims.height;
+      }
+    });
+
+    function getDimensions() {
+      var box = Engine.canvas.getBoundingClientRect();
+      var dims = {pos:{},center:{}};
+      dims.pos.x = box.left;
+      dims.pos.y = box.top;
+      dims.width = box.right - box.left;
+      dims.height = box.bottom - box.top;
+      dims.center.x = dims.pos.x + (dims.width / 2);
+      dims.center.y = dims.pos.y + (dims.height / 2);
+      return dims;
+    }
+
+    /*=== Info ===*/
+
+    var canvas = document.createElement("canvas");
+    canvas.width = 200;
+    canvas.height = 100;
+    var ctx = canvas.getContext("2d");
+    var infotexture = new THREE.Texture(canvas);
+    var infomat = new THREE.MeshBasicMaterial({map: infotexture});
+    var infoplane = new THREE.Mesh(new THREE.PlaneGeometry(2,1), infomat);
+    Engine.scene.add(infoplane);
+
+    textin.addEventListener("change", function () {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0,0, canvas.width, canvas.height);
+
+      var size = Number(sizein.value)
+      ctx.font = size + "px sans-serif";
+      ctx.fillStyle = "#000000";
+      ctx.fillText(textin.value, 5, size+5);
+      infotexture.needsUpdate = true;
+    });
+
+    Engine.update = function (delta) {
+      infoplane.position.copy(character.mesh.position);
+      infoplane.position.y += character.height;
+      infoplane.rotation.copy(Engine.camera.rotation);
+      if (mouseOver) {
+        var intersect = castPointer(mousePos.x, mousePos.y);
+        if (intersect && intersect.object == character.mesh) {
+          infoplane.visible = true;
+        } else {
+          infoplane.visible = false;
+        }
+      } else {
+        infoplane.visible = false;
+      }
+    }
+
+    Engine.start();
+  </script>
+</body>
+</html>

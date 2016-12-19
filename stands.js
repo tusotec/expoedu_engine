@@ -102,7 +102,8 @@ var tipos_stands = {}
 tipos_stands_data.forEach(function (tipo) {
   var mat = new THREE.MeshPhongMaterial({
     map: THREE.ImageUtils.loadTexture(tipo.img),
-    lightMap: THREE.ImageUtils.loadTexture(tipo.occ)
+    //lightMap: THREE.ImageUtils.loadTexture(tipo.occ)
+    aoMap: THREE.ImageUtils.loadTexture(tipo.occ)
   });
   Engine.jsonLoad(tipo.obj, function (geom, mats) {
     tipos_stands[tipo.nombre] = {geom: geom, mat: mat};

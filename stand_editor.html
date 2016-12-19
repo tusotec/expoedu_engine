@@ -5,7 +5,7 @@
   <title>Stand Editor</title>
   <!-- Todas son dependencias del editor, son varias porque esto ya es un
   programa 3d, y suelen ser complejos -->
-  <script type="text/javascript" src="js/three.js"></script>
+  <script type="text/javascript" src="js/three.73.js"></script>
   <script type="text/javascript" src="js/hammer.js"></script>
 
   <script type="text/javascript" src="engine.js"></script>
@@ -32,7 +32,7 @@
 <body>
   <h1>Stand Editor</h1>
   <div id="renderDiv"></div>
-
+  <button onclick="loadOcc()">Load Occ</button>
 <div id="image-div">
   <div id="image-main">
     <img src="textures/diff01.png">
@@ -64,5 +64,10 @@
   })
   Editor.container = document.getElementById("renderDiv");
   Editor.init();
+  Editor.loadJson("stands/std_bronce.json");
+  Editor.loadTexture("stands/expo_stand_bronce_diff.jpg")
+  function loadOcc() {
+    Editor.loadOcclusion("stands/expo_stand_bronce_occ.jpg");
+  }
 </script>
 </html>

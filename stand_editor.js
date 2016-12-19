@@ -19,8 +19,11 @@
   }
   Editor.loadOcclusion = function (url) {
     //if (!stand) {return}
-    Editor.material.lightMap = THREE.ImageUtils.loadTexture(url);
-    Editor.material.needsUpdate = true;
+    var txt = THREE.ImageUtils.loadTexture(url);
+    //Editor.material.lightMap = txt;
+    Editor.occlusion = txt;
+    Editor.material.aoMap = txt;
+    //Editor.material.needsUpdate = true;
   }
   Editor.loadTexture = function (url) {
     //if (!stand) {return}

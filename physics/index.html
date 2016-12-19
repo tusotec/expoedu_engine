@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF8">
+  <title>Character Class</title>
+  <script type="text/javascript" src="../engine/vendor/three_76.js"></script>
+  <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
+  <script type="text/javascript" src="../engine/vendor/cannon.js"></script>
+
+  <script type="text/javascript" src="../engine/engine.js"></script>
+  <script type="text/javascript" src="../engine/input_manager.js"></script>
+  <script type="text/javascript" src="../engine/utils.js"></script>
+  
+  <script type="text/javascript" src="character.js"></script>
+  <script type="text/javascript" src="user.js"></script>
+</head>
+<body>
+  <div id="renderDiv"></div>
+  <script type="text/javascript">
+    Engine.init({container: renderDiv, fps: 8});
+
+    var boxStatic = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5,0.5,0.5),
+      new THREE.MeshBasicMaterial({color:0xff0000})
+    );
+    var cyl = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.5, 0.5, 1.5),
+      new THREE.MeshBasicMaterial({color:0x0000ff})
+    );
+    cyl.position.set(-5,0,-5);
+
+    Engine.scene.add(cyl);
+    Engine.scene.add(boxStatic);
+
+    var character = new Engine.Character({mesh: cyl});
+
+    Engine.User.init({character: character, velocity: 3, distance: 4, yOff: 1})
+
+    /*=== Multiplayer ===*/
+/*
+    var playergeom = new THREE.BoxGeometry(0.5,1.6,0.5);
+    var playermat = new THREE.MeshBasicMaterial({color:0x00ff00});
+
+    Engine.Multiplayer.init({
+      url: "ws://localhost:3000",
+      character: character,
+      builder: function () {
+        var mesh = new THREE.Mesh(playergeom, playermat);
+        var character = new Engine.Character({mesh: mesh});
+        return character;
+      },
+      rate: 0.3 // 3hz aprox.
+    });
+*/
+
+    /*=== Physics ===*/
+
+    var world = new CANNON.World();
+    world.gravity.set(0,0,0);
+    world.broadphase = new CANNON.NaiveBroadphase();
+    world.solver.iterations = 2;
+
+    /* Objetos usandose */
+
+    var charShape = new CANNON.Cylinder(0.5, 0.5, 1.5, 8);
+    var charBody = new CANNON.Body({mass: 5000});
+    charBody.addShape(charShape);
+    charBody.position.set(-5,0,-5);
+    charBody.fixedRotation = true;
+    world.add(charBody);
+
+    var boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
+    var boxBody = new CANNON.Body({mass: 0});
+    boxBody.addShape(boxShape);
+    boxBody.position.copy(boxStatic.position);
+    world.addBody(boxBody);
+
+
+    Engine.update = function (delta) {
+      //charBody.position.copy(character.mesh.position);
+      var dir = character.direction.toCoord();
+      charBody.velocity.set(dir.x, 0, dir.y);
+      charBody.position.y = 0;
+      world.step(delta);
+      //charBody.velocity.setZero();
+      character.mesh.position.copy(charBody.position);
+      //character.mesh.position.y = 0;
+    }
+
+    Engine.start();
+  </script>
+</body>
+</html>
