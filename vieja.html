@@ -5,21 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expo Virtual Demo</title>
   <!-- three.js 71 -->
-  <!--<script type="text/javascript" src="js/three.73.js"></script>-->
-  <script type="text/javascript" src="three_75.js"></script>
+  <!-- Versiones: 71, 73, 75, 83 -->
+  <script type="text/javascript" src="js/three.83.js"></script>
   <!-- Hammer.JS - v2.0.4 -->
   <script type="text/javascript" src="js/hammer.js"></script>
 
   <!-- Importadores -->
+  <!--
   <script type="text/javascript" src="js/OBJMTLLoader.js"></script>
   <script type="text/javascript" src="js/MyOBJLoader.js"></script>
   <script  type="text/javascript" src="js/MTLLoader.js"></script>
+  -->
 
   <!-- Alternative Renderers -->
+  <!--
   <script  type="text/javascript" src="js/Projector.js"></script>
   <script  type="text/javascript" src="js/CanvasRenderer.js"></script>
   <script  type="text/javascript" src="js/SoftwareRenderer.js"></script>
-
+  -->
   <script type="text/javascript" src="engine.js"></script>
   <script type="text/javascript" src="input_manager.js"></script>
   <script type="text/javascript" src="character_controller.js"></script>
@@ -120,6 +123,7 @@
 
 
 </body>
+<!--
 <script type="text/javascript">
 
   var getParams = {}
@@ -168,11 +172,11 @@
     function loadObject (modelo) {
       //var occ = THREE.ImageUtils.loadTexture(modelo.occ)
       modelo.type = modelo.type || "json";
-      var diff = THREE.ImageUtils.loadTexture(modelo.diff);
+      //var diff = THREE.ImageUtils.loadTexture(modelo.diff);
       var occ = modelo.occ ? THREE.ImageUtils.loadTexture(modelo.occ) : undefined;
       if (modelo.type == "obj") {
         var mat = new THREE.MeshPhongMaterial({
-          map: diff,
+          //map: diff,
           lightMap: occ
         });
         Engine.objLoad(modelo.url, mat, function (obj) {
@@ -250,7 +254,7 @@
       controller = new CharacterController({
         mesh: robot, cam: Engine.camera, animations: rAnimations,
         velocity: 3, distance: 4, yOff: 0.8});
-      });
+    });
   }
 
   function loadStand (url, myFunc) {
@@ -321,4 +325,5 @@
 
 
 </script>
+-->
 </html>

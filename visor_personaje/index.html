@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF8">
+  <title>Visor de personaje</title>
+
+  <script type="text/javascript" src="../js/three.83.js"></script>
+  <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
+  <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
+  <script type="text/javascript" src="../engine/vendor/cannon.js"></script>
+
+  <script type="text/javascript" src="../engine/engine.js"></script>
+  <script type="text/javascript" src="../engine/input_manager.js"></script>
+  <script type="text/javascript" src="../engine/utils/camera_control.js"></script>
+
+  <!--<script type="text/javascript" src="../engine/utils.js"></script>-->
+</head>
+<body>
+  <div style="float: left;">
+    <div id="renderDiv"></div>
+    <div id="controls">
+      <button id="hide-monster">Mostrar/Ocultar Monstruo</button>
+      <br/>
+      <label for="upload-model">Cargar Modelo:</label>
+      <input type="file" name="upload-model" id="upload-model">
+      <br/>
+      <label for="size-in">Tamaño:</label>
+      <input type="text" name="size-in" id="size-in">
+      <br/>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody id="anim-table">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="info">
+    <p>
+      <strong>Plugin de Blender,</strong>
+      <br/>
+      <a href="https://github.com/mrdoob/three.js/tree/master/utils/exporters/blender">
+        Como instalarlo (en inglés)
+      </a>
+      <br/>
+      <a href="/three/utils/exporters/blender/blender_exporter.zip">
+        Descargarlo aquí
+      </a>
+    </p>
+    <p>
+      <strong>Nota:</strong>
+      Muy Probablemente las instrucciones de abajo no sirvan más,
+      estoy usando un mecanismo diferente ahora,
+      así que solo queda probar todo a ver que funciona.
+    </p>
+    <p>
+      Este es el
+      <a href="/three/examples/models/animated/monster/monster.js">
+        modelo del monstruo
+      </a>
+      que estoy usando ahorita, al exportar el personaje debe quedar parecido
+      a lo que sale ahí.
+    </p>
+    <p><strong>Instrucciones antiguas:</strong></p>
+    <p>
+      En blender, el único modelo que debe haber en la escena es el personaje,
+      los huesos también deben estar pero no cuentan como modelo.
+      Al exportar no debe haber nada seleccionado.
+      <br />
+      Las opciones importantes para exportar las animaciones son:
+      <br />
+    </p>
+    <pre>
+      Geometry:
+        Bones: true # Importante!
+        Skinning: true # Importante!
+      Skeletal Animations: Pose
+      Keyframe animations:
+        Keyframe Animation: true
+        Embed Animation: true
+      SCENE:
+        Scene: true
+        Hierarchy: true
+    </pre>
+    <p>
+      Como SCENE.Scene está activado, se va a exportar la escena, en vez de un solo modelo.
+      <br />
+      Three está favoreciendo el uso de escenas y desfavoreciendo el uso de modelos.
+      <br />
+      Para importar una escena en Three se usa THREE.ObjectLoader,
+      THREE.JSONLoader en cambio es para importar modelos simples.
+    </p>
+  </div>
+
+  <script type="text/javascript">
+
+    Engine.init({container: renderDiv, fps: 18, autoResize: false, useSunLight: true});
+
+    function addArrow (x, y, z, hex) {
+      var dir = new THREE.Vector3(x, y, z);
+      dir.normalize();
+
+      var origin = new THREE.Vector3( 0, 0, 0 );
+      var length = 1;
+
+      var arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
+      Engine.scene.add( arrowHelper );
+    }
+
+    addArrow(1,0,0, 0xff0000);
+    addArrow(0,1,0, 0x00ff00);
+    addArrow(0,0,1, 0x0000ff);
+
+    Engine.CameraControl.init({distance: 10, yOffset: 0});
+
+    var loader = new THREE.JSONLoader();
+
+    //=== Monstruo ===//
+
+    // Código copiado de "/three/examples/webgl_loader_json_blender.html"
+
+    var monster_url = "/three/examples/models/animated/monster/monster.js";
+
+    var monster = null;
+    var monster_geom = null;
+    var monster_mat = null;
+
+    var monster_mixer = null;
+
+    loader.load( monster_url, function ( geometry, materials ) {
+
+      var material = materials[ 0 ];
+      material.color.setHex( 0xffaaaa ); // adjust color a bit
+
+      // Esto indica que los vértices de los objetos con este material
+      // se mueven con el tiempo
+      // (Creo que three no tiene animación de huesos, solo morphs,
+      // que es un tipo diferente de animación, o los modelos que
+      // vienen con three están animados con morphs en vez de huesos...)
+      material.morphTargets = true;
+
+      // Esto no hace falta tampoco
+      var faceMaterial = new THREE.MultiMaterial( materials );
+
+      mesh = new THREE.Mesh( geometry, faceMaterial );
+
+      // El Monstruo es INMENSO
+      var s = 0.001;
+      mesh.scale.set( s, s, s );
+
+      // Añadir los objetos a la escena antes de cualquier error
+      monster = mesh;
+      monster_geom = geometry;
+      monster_mat = faceMaterial;
+
+      // Esto evita que el modelo se actualize solo cuando cambia de tamaño,
+      // posición o rotación, y así mejora un poquito el rendimiento.
+      mesh.matrixAutoUpdate = false;
+      mesh.updateMatrix();
+
+      Engine.scene.add( mesh );
+
+      // Animación ...
+      monster_mixer = new THREE.AnimationMixer( mesh );
+      monster_mixer.clipAction( geometry.animations[0] )
+          .setDuration( 1 )     // one second
+          .startAt( - Math.random() ) // random phase (already running)
+          .play();          // let's go
+    } );
+
+    //=== Cargar Modelos ===//
+
+    var model = null;
+    var geom = null;
+    var mat = null;
+
+    var mixer = null;
+
+    function loadAnimations (mesh) {
+      var geom = mesh.geometry;
+
+      var table = document.getElementById("anim-table");
+
+      // Eliminar todas las entradas
+      while (table.firstChild) { table.removeChild(table.firstChild); }
+
+      if (geom.animations) {
+        mixer =  new THREE.AnimationMixer( mesh );
+        geom.animations.forEach(function (animation) {
+
+          var tr, td, text, input;
+          tr = document.createElement("tr");
+
+          // Nombre de la animación
+          td = document.createElement("td");
+          text = document.createTextNode(animation.name);
+          td.appendChild(text);
+          tr.appendChild(td);
+
+          // Influencia de la animación
+          td = document.createElement("td");
+          input = document.createElement("input");
+          input.type = "range";
+          input.max = "100";
+          input.value = "0.0";
+          td.appendChild(input);
+          tr.appendChild(td);
+
+          // Para que funcione en firefox en linux
+          input.style.backgroundColor = "inherit";
+
+          table.appendChild(tr);
+
+          input.addEventListener("change", function (ev) {
+            var value = Number(input.value)/100;
+            mixer.clipAction(animation).setEffectiveWeight(value);
+          });
+
+          mixer.clipAction(animation).setEffectiveWeight(0);
+          mixer.clipAction(animation).play();
+        });
+      }
+    }
+
+    function loadObject (url) {
+      // Si ya hay un personaje cargado, eliminarlo
+      if (model) {
+        Engine.scene.remove(model);
+        model = null;
+        geom = null;
+        mat = null;
+      }
+
+      loader.load(url, function (geometry, materials) {
+
+        // La explicación de como cargar un modelo animado
+        // está en la sección del monstruo
+
+        // Material básico porque solo se suben objetos, no texturas
+        var material = new THREE.MeshLambertMaterial({color:0x888888});
+        material.morphTargets= true;
+
+        mesh = new THREE.Mesh( geometry, material );
+
+        // Guardarlos en variables antes de que algo salga mal
+        model = mesh;
+        geom = geometry;
+        mat = material;
+
+        Engine.scene.add( mesh );
+
+        // Animaciónes ...
+        loadAnimations(mesh);
+      });
+    }
+
+
+    //=== Controles ===//
+    document.getElementById("hide-monster").addEventListener("click", function () {
+      if (monster) {
+        monster.visible = !monster.visible;
+      }
+    });
+    document.getElementById("upload-model").addEventListener("change", function (ev) {
+      var file = ev.target.files[0];
+      var reader  = new FileReader();
+
+      reader.addEventListener("load", function () {
+        var url = reader.result;
+        loadObject(url);
+        document.getElementById("size-in").value = "1.0";
+      }, false);
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    });
+    document.getElementById("size-in").value = "1.0";
+    document.getElementById("size-in").addEventListener("change", function (ev) {
+      if (model) {
+        var size = Number(document.getElementById("size-in").value);
+        if (isFinite(size)) {
+          model.scale.set(size, size, size);
+        }
+      }
+    });
+
+    Engine.update = function (delta) {
+      if (monster_mixer) {
+        monster_mixer.update( delta );
+      }
+
+      if (mixer) {
+        mixer.update( delta );
+      }
+
+      Engine.CameraControl.update();
+    };
+
+    Engine.start();
+
+  </script>
+</body>
+</html>

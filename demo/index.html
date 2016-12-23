@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Expoferia</title>
+
+  <script type="text/javascript" src="../js/three.83.js"></script>
+  <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
+  <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
+  <script type="text/javascript" src="../engine/vendor/cannon.js"></script>
+
+  <script type="text/javascript" src="../engine/engine.js"></script>
+  <script type="text/javascript" src="../engine/input_manager.js"></script>
+  <script type="text/javascript" src="../engine/character_controller.js"></script>
+
+  <script type="text/javascript" src="../expo.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="main.css">
+
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.css">
+</head>
+  <body><div id="content">
+    <div id="hud">
+      <div id="main-menu" class="menu menu-hidden">
+        <div class="menu-head" id="menu-head">
+          <i class="fa fa-bars"></i>
+        </div>
+        <div class="menu-body">
+          <ul>
+            <li><i class="fa fa-suitcase"></i> Portafolio </li>
+            <li><i class="fa fa-map"></i> Mapa </li>
+            <li><i class="fa fa-calendar"></i> Calendario </li>
+            <li><i class="fa fa-search"></i> Buscar </li>
+            <li><i class="fa fa-user"></i> Perfil </li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="joystick">
+        <img src="joystick.svg">
+      </div>
+    </div>
+    <div id="renderDiv"></div>
+  </div>
+
+  <script type="text/javascript">
+    document.getElementById("menu-head").addEventListener("click", function () {
+      var classList = document.getElementById("main-menu").classList;
+      if (classList.contains("menu-hidden")) {
+        classList.remove("menu-hidden");
+      } else {
+        classList.add("menu-hidden");
+      }
+    });
+  </script>
+
+  <script type="text/javascript" src="main.js"></script>
+
+</body>
+</html>

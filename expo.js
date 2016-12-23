@@ -1,3 +1,6 @@
+
+/*/
+
 var modelos = [
   {url: "expo/ext_bloques_edificio.json", occ: "expo/ext_bloques_occ.jpg"},
   {url: "expo/ext_arcos_edificio.json", occ: "expo/ext_arcos_occ.jpg"},
@@ -25,4 +28,18 @@ var modelos = [
   {url: "expo/std_expovirtual.json", occ: "expo/expo_stand_expovirtual_occ.jpg"},
   {url: "expo/pab_marcos.json", occ: "expo/pab_piso_occ.jpg"},
   //{url: "expo/pab_valla_2.json", occ: "expo/ext_cielo_occ.jpg"}
-]
+];
+
+/*/
+
+var modelos = [
+  {url: "expo/ext_bloques_edificio.json", occ: "expo/ext_bloques_occ.jpg"},
+  {url: "expo/ext_arcos_edificio.json", occ: "expo/ext_arcos_occ.jpg"},
+  {url: "expo/pab_estructura_techo.json", occ: "expo/ext_cielo_occ.jpg"},
+  {url: "expo/ext_vidrios_edificio_2.json", occ: "expo/ext_vidrios_occ.jpg"},
+  {url: "expo/ext_vidrios_edificio.json", occ: "expo/ext_vidrios_occ.jpg"},
+  {url: "expo/ext_piso_entrada.json", occ: "expo/ext_piso_entrada_occ.jpg"},
+  {url: "expo/pab_piso.json", occ: "expo/pab_piso_occ.jpg"}
+];
+
+//*/

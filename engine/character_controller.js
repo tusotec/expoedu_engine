@@ -67,6 +67,14 @@ window.CharacterController = function(params) {
     if (Input.joystick.touch.active) {
       x = Input.joystick.touch.x / Input.joystick.width;
       y = Input.joystick.touch.y / Input.joystick.height;
+
+      console.log("Joystick Data", {
+        x: Input.joystick.touch.x,
+        y: Input.joystick.touch.x,
+        width: Input.joystick.width,
+        width: Input.joystick.height,
+      });
+      console.log("Joystick move", x, y);
     }
 
     if (x != 0 || y != 0) {

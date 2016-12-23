@@ -1,0 +1,94 @@
+body {
+  font-family: sans-serif;
+}
+
+html, body {
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+}
+
+#content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+#renderDiv {
+  width: 100%;
+  height: 100%;
+}
+
+#joystick {
+  position: absolute;
+  right: 1.5em;
+  bottom: 1.5em;
+
+  /*
+    si la ventana es 640*480 (horizontal), vmin es 480,
+    y si es 480*640 (vertival), vmin también es 480.
+    33vmin significaría (480 * 33%)
+  */
+  height:33vmin;
+  width:33vmin;
+}
+
+#joystick img {
+  width: 100%;
+  height: 100%;
+
+  /* No funciona ninguno, o al menos no en firefox */
+  user-drag: none; 
+  user-select: none;
+
+  /* Este sí funciona */
+  pointer-events: none;
+}
+
+.menu {
+  display: inline-block;
+  position: absolute;
+  left: 1.5em;
+  bottom: 1.5em;
+
+  border-radius: 6px;
+  color: white;
+}
+
+.menu-head {
+  background-color: rgba(0,0,0,0.8);
+  padding: 0.5em;
+  cursor: pointer;
+}
+
+.menu-body {
+  background-color: rgba(0,0,0,0.6);
+  padding: 0px;
+
+  /* Necesario para las transiciones */
+  width: 100%;
+  height: 100%;
+
+  overflow: hidden;
+
+  transition: width 1s, height 1s;
+}
+
+.menu-hidden .menu-body {
+  height: 0px;
+  width: 0px;
+}
+
+.menu-body ul {
+  list-style: none;
+  padding: 0.8em;
+  margin: 0px;
+}
+
+.menu-body ul li {
+  padding: 0.5em;
+  letter-spacing: 0.25em;
+
+  white-space: nowrap;
+}

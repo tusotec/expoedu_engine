@@ -29,7 +29,10 @@ var defaultParams = {
   fps: 0,
   webgl: true,
   mobile: false,
-  autoResize: true
+  autoResize: true,
+
+  useAmbientLight: true,
+  useSunLight: false,
 };
 
 function extend (obj1, obj2) {
@@ -85,15 +88,20 @@ window.Engine.init = function (inparams) {
   this.sun = new THREE.DirectionalLight(0xffffff, 1);
   this.sun.position.set(1, 5, 1)
 
-  this.scene.add(this.ambient);
-  //this.scene.add(this.sun);
+  if (params.useAmbientLight) {
+    this.scene.add(this.ambient);
+  }
+  if (params.useSunLight) {
+    this.scene.add(this.sun);
+  }
 
   this.camera = new THREE.PerspectiveCamera(
     45, width/height, params.near, params.far);
 
   this.clock = new THREE.Clock();
 
-  if (params.autoResize) {
+  this.autoResize = params.autoResize;
+  if (this.autoResize) {
     window.addEventListener("resize", onResize);
   }
 
@@ -199,7 +207,9 @@ window.Engine.loadAll = function () {
 }
 
 window.Engine.start = function () {
-  onResize();
+  if (this.autoResize) {
+    onResize();
+  }
   if (!this.running) {
     this.running = true;
     this.render();
