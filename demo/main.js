@@ -103,6 +103,10 @@ modelos.forEach(function (modelo) {
   });
 });
 
+// Stands
+
+loadStands();
+
 //=== Iniciar ===//
 
 Engine.update = function (delta) {
@@ -129,7 +133,7 @@ function hideAdressBar () {
   var screen = new Hammer(Engine.canvas);
   screen.on("panstart tap", hideAdressBar);
 
-  var joystick = new Hammer(Edocument.getElementById('joystick'));
+  var joystick = new Hammer(document.getElementById('joystick'));
   joystick.on("panstart tap", hideAdressBar);
 })();
 

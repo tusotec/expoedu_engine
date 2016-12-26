@@ -244,8 +244,9 @@
         // Material básico porque solo se suben objetos, no texturas
         var material = new THREE.MeshLambertMaterial({color:0x888888});
         material.morphTargets= true;
+        material.skinning = true;
 
-        mesh = new THREE.Mesh( geometry, material );
+        mesh = new THREE.SkinnedMesh( geometry, material, false);
 
         // Guardarlos en variables antes de que algo salga mal
         model = mesh;
