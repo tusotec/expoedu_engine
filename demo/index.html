@@ -5,30 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Demo Expoferia</title>
 
-  <script type="text/javascript" src="../js/three.83.js"></script>
-  <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
-  <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
-  <script type="text/javascript" src="../engine/vendor/cannon.js"></script>
-
-  <script type="text/javascript" src="../engine/engine.js"></script>
-  <script type="text/javascript" src="../engine/input_manager.js"></script>
-  <script type="text/javascript" src="../engine/character_controller.js"></script>
-
-  <script type="text/javascript" src="../expo.js"></script>
-  <script type="text/javascript" src="stands.js"></script>
-
   <link rel="stylesheet" type="text/css" href="main.css">
 
+  <!--<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.css">-->
   <link rel="stylesheet" href="/font-awesome/css/font-awesome.css">
 </head>
-  <body><div id="content">
+<body>
+  <div id="content">
     <div id="hud">
+      <div id="joystick">
+        <img src="joystick.svg">
+      </div>
+
+      <div id="modal" class="modal-hidden">
+        <div> <!-- Este se encarga de que no ocupe toda la pantalla -->
+          <div> <!-- Este es el que en verdad tiene el contenido -->
+            <span class="close">&times;</span>
+            <div id="modal-content">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="main-menu" class="menu menu-hidden">
         <div class="menu-head" id="menu-head">
           <i class="fa fa-bars"></i>
         </div>
         <div class="menu-body">
           <ul>
+            <li onclick="cargarExpo()">Cargar Expo</li>
+            <li onclick="cargarStands()">Cargar Stands</li>
             <li><i class="fa fa-suitcase"></i> Portafolio </li>
             <li><i class="fa fa-map"></i> Mapa </li>
             <li><i class="fa fa-calendar"></i> Calendario </li>
@@ -37,13 +43,23 @@
           </ul>
         </div>
       </div>
-
-      <div id="joystick">
-        <img src="joystick.svg">
-      </div>
     </div>
     <div id="renderDiv"></div>
   </div>
+
+  <!-- External Scripts -->
+    <script type="text/javascript" src="../js/three.83.js"></script>
+    <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
+    <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
+    <script type="text/javascript" src="../engine/vendor/cannon.js"></script>
+
+    <script type="text/javascript" src="../engine/engine.js"></script>
+    <script type="text/javascript" src="../engine/input_manager.js"></script>
+    <script type="text/javascript" src="../engine/character_controller.js"></script>
+
+    <script type="text/javascript" src="expo.js"></script>
+    <script type="text/javascript" src="stands.js"></script>
+  <!-- End external Scripts -->
 
   <script type="text/javascript">
     document.getElementById("menu-head").addEventListener("click", function () {
@@ -54,9 +70,30 @@
         classList.add("menu-hidden");
       }
     });
+
+    var modal = document.getElementById("modal");
+    var modalContent = document.getElementById("modal-content");
+
+    function modalHide () {
+      modal.classList.add("modal-hidden");
+      modalContent.innerHTML = "";
+    }
+
+    function modalShow (content) {
+      modal.classList.remove("modal-hidden");
+      modalContent.innerHTML = content;
+    }
+
+    // Si le da click al modal (al fondo transparente, no a los hijos
+    // del modal), hay que cerrarlo.
+    window.addEventListener("click", function (ev) {
+      if (ev.target == modal) { modalHide() }
+    });
+
+    modal.getElementsByClassName("close")[0].addEventListener("click", modalHide);
   </script>
 
-  <script type="text/javascript" src="main.js"></script>
+  <!--<script type="text/javascript" src="main.js"></script>-->
 
 </body>
 </html>

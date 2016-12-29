@@ -4,7 +4,7 @@ Engine.Physics = {
     var world = new CANNON.World();
     world.gravity.set(0,0,0);
     world.broadphase = new CANNON.NaiveBroadphase();
-    world.solver.iterations = 2;
+    //world.solver.iterations = 20;
     this.world = world;
 
     Engine.onPreupdate(function (delta) {

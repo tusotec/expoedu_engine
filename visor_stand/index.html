@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF8">
+  <title>Visor de Stand</title>
+
+  <script type="text/javascript" src="../js/three.83.js"></script>
+  <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
+
+  <script type="text/javascript" src="../engine/engine.js"></script>
+  <script type="text/javascript" src="../engine/input_manager.js"></script>
+  <script type="text/javascript" src="../engine/utils/camera_control.js"></script>
+
+  <!--<script type="text/javascript" src="../engine/utils.js"></script>-->
+</head>
+<body>
+  <div style="float: left;">
+    <div id="renderDiv"></div>
+    <div id="controls">
+      <select name="stand-select" id="stand-select">
+        <option value="bronce">Bronce</option>
+        <option value="plata">Plata</option>
+        <option value="oro">Oro</option>
+      </select>
+      <button id="region-add">Añadir Sección</button>
+    </div>
+  </div>
+  <canvas id="main-canvas" width="512"  height="512"></canvas>
+  <table>
+    <thead>
+      <tr>
+        <th>X</th>
+        <th>Y</th>
+        <th>Width</th>
+        <th>Height</th>
+        <th>Url</th>
+        <th>Eliminar</th>
+      </tr>
+    </thead>
+    <tbody id="regions">
+    </tbody>
+  </table>
+
+  <textarea disabled="disabled" id="result-area"></textarea>
+
+  <script type="text/javascript">
+
+    Engine.init({container: renderDiv, fps: 18, autoResize: false, useSunLight: false});
+
+    Engine.CameraControl.init({distance: 15, yOffset: 2});
+
+    var loader = new THREE.JSONLoader();
+
+    var stands = [];
+
+    function loadStand(name, url) {
+      loader.load(url, function (geom, mats) {
+        var mat = mats[0];
+        var mesh = new THREE.Mesh(geom, mat);
+        stands[name] = mesh;
+      });
+    };
+
+    loadStand("bronce", "../stands/std_bronce.json");
+    loadStand("plata", "../stands/std_plata.json");
+    loadStand("oro", "../stands/std_oro.json");
+
+    var stand = null;
+
+    var img = null;
+    var canvas = document.getElementById("main-canvas");
+    var ctx = canvas.getContext("2d");
+
+    var regionsTable = document.getElementById("regions");
+    var regions = [];
+
+    var resultArea = document.getElementById("result-area");
+
+    function update () {
+      if (stand) {
+        var img = stand.material.map.image;
+        if (img) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      regions.forEach(function (region) {
+        ctx.fillStyle = "rgba(0,128,128,0.5)";
+        ctx.fillRect(
+          region.x * canvas.width,
+          region.y * canvas.height,
+          region.w * canvas.width,
+          region.h * canvas.height
+        );
+      });
+
+      resultArea.value = JSON.stringify(regions);
+    }
+
+    function addRegion () {
+      var region = {};
+      region.x = 0;
+      region.y = 0;
+      region.w = 0;
+      region.h = 0;
+      region.url = "";
+
+      var elem = document.createElement("tr");
+      region.elem = elem;
+
+      function removeThis () {
+        regionsTable.removeChild(elem);
+        index = regions.indexOf(region);
+        if (index >= 0) {
+          regions.splice(index, 1);
+        }
+        update();
+      }
+
+      function Range () {
+        var input = document.createElement("input");
+        input.type = "range";
+        input.max = "1.0";
+        input.value = "0.0";
+        input.step = "0.01";
+        // Necesario para que funcione en firefox linux
+        input.style.background = "inherit";
+        return input;
+      }
+      function addTd (inp) {
+        var td = document.createElement("td");
+        td.appendChild(inp);
+        elem.appendChild(td);
+      }
+
+      function makeInp (type, field) {
+        var inp;
+        var evname = "change";
+        switch (type) {
+          case "range":
+            evname = "input";
+            inp = Range();
+            break;
+          default:
+            inp = document.createElement("input");
+            inp.value = "";
+        }
+
+        inp.addEventListener(evname, function (ev) {
+          var value;
+          switch (type) {
+            case "range":
+            case "number":
+              value = Number(inp.value);
+              break;
+            default:
+              value = inp.value;
+          }
+          region[field] = value;
+          update();
+        });
+
+        addTd(inp);
+      }
+
+      makeInp("number", "x");
+      makeInp("number", "y");
+      makeInp("number", "w");
+      makeInp("number", "h");
+      makeInp("text", "url");
+
+      var btn = document.createElement("button");
+      btn.innerText = "Eliminar";
+      btn.addEventListener("click", removeThis);
+      addTd(btn);
+
+      regionsTable.appendChild(elem);
+
+      regions.push(region);
+
+      update();
+    }
+
+    document.getElementById("region-add").addEventListener("click", addRegion);
+
+    document.getElementById("stand-select").addEventListener("change", function (ev) {
+      var value = document.getElementById("stand-select").value;
+
+      if (stand) {
+        Engine.scene.remove(stand);
+        stand = null;
+      }
+      if (stands[value]) {
+        stand = stands[value];
+        Engine.scene.add(stand);
+        update();
+      } else {
+        console.error("Unrecognized stand", value);
+      }
+    })
+
+    Engine.update = function (delta) {
+      Engine.CameraControl.update();
+    };
+
+    Engine.start();
+
+  </script>
+</body>
+</html>

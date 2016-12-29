@@ -17,8 +17,11 @@ Character = function (params) {
       params.type == Character.DYNAMIC) && Engine.Physics) {
     this.physics = true;
 
+    var type = (params.type==Character.DYNAMIC) ?
+      CANNON.Body.DYNAMIC : CANNON.Body.KINEMATIC;
+
     var shape = new CANNON.Cylinder(this.radius, this.radius, this.height, 8);
-    this.body = new CANNON.Body({mass: 1});
+    this.body = new CANNON.Body({mass: 1, type: type});
     this.body.addShape(shape);
     this.body.fixedRotation = true;
     Engine.Physics.world.add(this.body);

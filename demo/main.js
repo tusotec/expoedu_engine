@@ -48,64 +48,30 @@ loader.load(character_url, function (geometry, materials) {
 
   controller = new CharacterController({
     mesh: obj, cam: Engine.camera, animations: null,
-    velocity: 2.6, angleSmooth: 3, distance: 4, yOff: 0.8});
+    velocity: 10, angleSmooth: 3, distance: 4, yOff: 0.8});
+  // Velocidad del monstruo debería ser 2.6
 });
 
 //=== Expo ===//
 
-// modelos está definido en ../expo.js
+//cargarExpo();
+//cargarStands();
 
-var texture_loader = new THREE.TextureLoader();
+function loadContent (name) {
+  var url = "content/" + name + ".html";
 
-// Tengo que hacerlo así de horrible porque los modelos están
-// mal exportados
-
-modelos.forEach(function (modelo) {
-  var url = "../" + modelo.url;
-
-  loader.load(url, function (geom, mats) {
-
-    // Todo esto debería estar en el archivo del modelo original,
-    // pero está mal exportado así que tengo que hacer todo esto
-    var mats = mats.map(function (base_mat) {
-      var mat = new THREE.MeshBasicMaterial();
-
-      // Debería ser (1,1,1), pero la textura es muy oscura
-      mat.color.setRGB(1.1,1.1,1.1);
-
-      // Por estar mal exportado
-      mat.map = base_mat.lightMap;
-
-      // Porque son texturas pequeñas que se repiten
-      mat.map.wrapT = THREE.RepeatWrapping;
-      mat.map.wrapS = THREE.RepeatWrapping;
-
-      // Muchos objetos son transparentes
-      mat.transparent = base_mat.transparent;
-      mat.depthTest = base_mat.depthTest;
-      mat.depthWrite = base_mat.depthWrite;
-
-      // Cargar la oclusión por separado, sí hay una
-      if (modelo.occ) {
-        var url = "../" + modelo.occ;
-        texture_loader.load(url, function (texture) {
-          mat.aoMap = texture;
-          mat.needsUpdate = true;
-        });
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4) {
+      if (xmlhttp.status == 200) {
+        console.warn("Ajax request status", xmlhttp.status);
       }
-
-      return mat;
-    });
-
-    var material = new THREE.MeshFaceMaterial(mats);
-    var model = new THREE.Mesh(geom, material);
-    Engine.scene.add(model);
-  });
-});
-
-// Stands
-
-loadStands();
+      modalShow(xmlhttp.responseText);
+    }
+  }
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+}
 
 //=== Iniciar ===//
 

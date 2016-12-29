@@ -24,8 +24,9 @@ window.Input = {
     "active": false,
     "x": 0, "y": 0
   },
-  "onclick": function (dt) {
-    console.log("clicked!! at: " + dt.x + ", " + dt.y);
+  "_onclick": [],
+  "onclick": function (callback) {
+    Input._onclick.push(callback);
   }
 };
 
@@ -116,7 +117,10 @@ Engine.onInit(function () {
     getDimensions();
     Input.click.x = 2*(ev.center.x - dims.center.x)/dims.width;
     Input.click.y = 2*(ev.center.y - dims.center.y)/dims.height;
-    Input.onclick(Input.click);
+    Input._onclick.forEach(function (callback) {
+      callback(Input.click)
+    });
+    //Input.onclick(Input.click);
     //Input.onclick(ev);
   })
 
