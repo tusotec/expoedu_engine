@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Detección de Colisiones</title>
+  <script type="text/javascript" src="collision.js"></script>
+</head>
+<body>
+  <canvas id="canvas" width="640" height="480" style="float:left;"></canvas>
+  <div>
+    X: <input type="number" id="x-in"><br/>
+    Y: <input type="number" id="y-in"><br/>
+    <button id="move-btn">Move</button><br/>
+    Distancia: <span id="dist-span"></span>
+  </div>
+
+  <script type="text/javascript">
+
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    var circle = new Collision.Circle(new Collision.Vec(100, 100), 20);
+    // En sentido horario, el polígono es cerrado
+    // En sentido anti-horario, esta invertido
+    var polygon = new Collision.Polygon([10,10, 100,300, 500,350, 400,200, 550,50]);
+    var circle2 = new Collision.Circle(new Collision.Vec(350, 200), 40);
+
+    var geom = new Collision.Geometry(
+      [0,0, 20,0, 20,20, 0,20],
+      new Collision.Vec(250, 200),
+      Math.PI/3
+    );
+
+    var collection = new Collision.Collection([polygon, circle2, geom]);
+
+    var segment = polygon.segments[3];
+
+    // Paint
+      function clearCanvas() {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#000000";
+      }
+
+      function drawCircle (circle, color) {
+        var x = circle.p.x;
+        var y = circle.p.y;
+        var r = circle.r;
+        ctx.fillStyle = color || "#000000";
+        ctx.beginPath();
+        ctx.arc(x,y, r, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      function drawPoly (verts, color) {
+        ctx.fillStyle = color || "#000000";
+        ctx.beginPath();
+        ctx.moveTo(verts[0].x, verts[0].y);
+        for (var i = 0; i < verts.length; i++) {
+          ctx.lineTo(verts[i].x, verts[i].y);
+        }
+        ctx.lineTo(verts[0].x, verts[0].y);
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      function drawPoint (p, color) {
+        ctx.fillStyle = color || "#ff0000";
+        ctx.beginPath();
+        ctx.arc(p.x,p.y, 2, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.closePath();
+      }
+
+      function paint () {
+        clearCanvas();
+        drawPoly(polygon.vertices);
+        drawCircle(circle2);
+        drawPoly(geom.vertices);
+        drawCircle(circle, "#00ffff");
+      }
+    // End Paint
+
+    function printDist () {
+
+      var dist = segment.dist(circle.p);
+      var txt = dist;
+      document.getElementById("dist-span").textContent = txt;
+    }
+
+    function moveTo (x,y) {
+      circle.setxy(x,y);
+      circle.collideWith(collection);
+
+      paint();
+      printDist();
+
+      var closest = circle2.closestPoint(circle.p);
+      drawPoint(closest.x, closest.y);
+    }
+
+    document.getElementById("move-btn").addEventListener("click", function (ev) {
+      var xin = document.getElementById("x-in");
+      var yin = document.getElementById("y-in");
+      moveTo(Number(xin.value), Number(yin.value));
+    });
+
+    var dragging = false;
+    function moveMouse (ev) {
+      var rect = canvas.getBoundingClientRect();
+      var x = ev.clientX - rect.left;
+      var y = ev.clientY - rect.top;
+      moveTo(x, y);
+    }
+    canvas.addEventListener("click", moveMouse);
+    canvas.addEventListener("mousedown", function (ev) {
+      dragging = true; moveMouse(ev);
+    });
+    canvas.addEventListener("mousemove", function (ev) {
+      if (dragging) { moveMouse(ev); }
+    });
+    canvas.addEventListener("mouseup", function (ev) {
+      dragging = false;
+    });
+    paint();
+
+    var seg1 = polygon.segments[3];
+    var seg2 = polygon.segments[4];
+    console.log(seg1.rect.intersect(seg2.rect), seg1.b, seg2.a);
+  </script>
+</body>
+</html>
