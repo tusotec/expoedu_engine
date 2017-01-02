@@ -1,5 +1,5 @@
 
-/*/
+//*/
 
 var modelos = [
   {url: "expo/ext_bloques_edificio.json", occ: "expo/ext_bloques_occ.jpg"},
@@ -43,6 +43,30 @@ var modelos = [
 ];
 
 //*/
+
+var expo_poly = [
+  2.8, 42.47,
+  3.16, 9.32,
+  25.3, 8.12,
+  25.3, 0.7,
+  1.7, 0.6,
+  1.5, -0.2,
+  9.36, -0.1,
+  9.3, -25.0,
+
+  -9.3, -25.0,
+  -9.36, -0.1,
+  -1.5, -0.2,
+  -1.7, 0.6,
+
+  -10.2, 0.22,
+  -9.8, 3.3,
+  -27.7, 3.24,
+  -26.6, 8.2,
+
+  -3.16, 9.32,
+  -2.8, 42.47,
+];
 
 function cargarExpo () {
   var loader = new THREE.JSONLoader();

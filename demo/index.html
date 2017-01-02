@@ -33,6 +33,7 @@
         </div>
         <div class="menu-body">
           <ul>
+            <li onclick="mostrarPos()">Mostrar Posición</li>
             <li onclick="cargarExpo()">Cargar Expo</li>
             <li onclick="cargarStands()">Cargar Stands</li>
             <li><i class="fa fa-suitcase"></i> Portafolio </li>
@@ -91,9 +92,15 @@
     });
 
     modal.getElementsByClassName("close")[0].addEventListener("click", modalHide);
+
+    function mostrarPos () {
+      var x = controller.mesh.position.x;
+      var y = controller.mesh.position.z;
+      alert("x: " + x + ", y: " + y);
+    }
   </script>
 
-  <!--<script type="text/javascript" src="main.js"></script>-->
+  <script type="text/javascript" src="main.js"></script>
 
 </body>
 </html>

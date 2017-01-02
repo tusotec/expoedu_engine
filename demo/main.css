@@ -54,6 +54,12 @@ html, body {
 
   border-radius: 6px;
   color: white;
+
+  overflow-y: auto;
+
+  max-height: 80%;
+
+  transition: max-height: 1s;
 }
 
 .menu-head {
@@ -72,7 +78,7 @@ html, body {
 
   overflow: hidden;
 
-  transition: width 1s, height 1s;
+  transition: height 1s;
 }
 
 .menu-hidden .menu-body {
