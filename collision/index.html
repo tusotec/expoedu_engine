@@ -22,7 +22,7 @@
     var circle = new Collision.Circle(new Collision.Vec(100, 100), 20);
     // En sentido horario, el polígono es cerrado
     // En sentido anti-horario, esta invertido
-    var polygon = new Collision.Polygon([10,10, 100,300, 500,350, 400,200, 550,50]);
+    var polygon = new Collision.Polygon([10,50, 10,300, 500,350, 400,200, 550,50]);
     var circle2 = new Collision.Circle(new Collision.Vec(350, 200), 40);
 
     var geom = new Collision.Geometry(
@@ -33,7 +33,7 @@
 
     var collection = new Collision.Collection([polygon, circle2, geom]);
 
-    var segment = polygon.segments[3];
+    var segment = polygon.segments[4];
 
     // Paint
       function clearCanvas() {
@@ -89,6 +89,7 @@
       document.getElementById("dist-span").textContent = txt;
     }
 
+    var closest;
     function moveTo (x,y) {
       circle.setxy(x,y);
       circle.collideWith(collection);
@@ -96,8 +97,8 @@
       paint();
       printDist();
 
-      var closest = circle2.closestPoint(circle.p);
-      drawPoint(closest.x, closest.y);
+      closest = segment.closestPoint(circle.p);
+      drawPoint(closest);
     }
 
     document.getElementById("move-btn").addEventListener("click", function (ev) {

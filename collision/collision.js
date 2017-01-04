@@ -45,6 +45,10 @@ var Collision = {
     return new Polar(angle, this.length);
   }
 
+  Vec.prototype.dot = function (that) {
+    return this.x*that.x + this.y*that.y;
+  }
+
 //=== Polar ===//
 
   function Polar (a, d) {
@@ -132,18 +136,23 @@ var Collision = {
 
 //=== Rect ===//
 
-  function Rect (a, b, p) {
-    // ecuación: y = a*x + b
-    // a: pendiente
-    // b: corte en y
+  function Rect (a, b) {
+    // la ecuación canónica: y = a*x + b
+    // no puede representar rectas verticales
+
+    // ecuación: a*x + b*y + c = 0
+    // corte en x: -c/b
+    // corte en y: -c/a
+    // pendiente:  -a/b
     this.a = a ? Number(a) : 0;
     this.b = b ? Number(b) : 0;
+    //this.c = c ? Number(c) : 0;
   }
 
   Collision.Rect = Rect;
 
   Rect.fromPoints = function (a, b) {
-    var m=(b.y-a.y)/(b.x-a.x)
+    var m=(b.y-a.y)/(b.x-a.x);
     return Rect.fromPend(m, a);
   }
 
@@ -211,25 +220,21 @@ var Collision = {
   Collision.Segment = Segment;
 
   Segment.prototype.closestPoint = function (p) {
-    // Primero hay que tener las rectas paralelas al segmento que pasan por
-    // ambos puntos del segmento.
-    var ra = this.rect.perpendicular(this.a);
-    var rb = this.rect.perpendicular(this.b);
+    //return this.rect.closestPoint(p);
 
-    var dra = ra.dist(p);
-    var drb = rb.dist(p);
+    var ab = this.b.sub(this.a);
+    var ap = p.sub(this.a);
 
-    // Si la distancia a alguna de las dos rectas es mayor a la longitud
-    // del segmento, estamos fuera del area de efecto.
-    if (dra>this.length || drb>this.length) {
-      // Por lo tanto el punto más cercano es el extremo más cercano
-      var da = this.a.dist(p);
-      var db = this.b.dist(p);
-      return (da < db) ? this.a : this.b;
-    }
+    // Proyectar ap en ab, y luego hacerlo relativo a ab
+    var t = ab.dot(ap) / ab.dot(ab);
+    // ab.dot(ab) es la logitud de ab al cuadrado
 
-    // Si no, es el punto más cercano en la recta
-    return this.rect.closestPoint(p);
+    // No salir del segmento
+    if (t<0) {t=0;}
+    if (t>1) {t=1;}
+
+    // Obtener el punto final
+    return this.a.add(ab.scaled(t));
   }
 
   Segment.prototype.dist = function (p) {
@@ -408,8 +413,10 @@ var Collision = {
 
   function Geometry (data, pos, angle) {
     this.data = data;
-    this.p = pos || new Vec();
-    this.a = angle || 0;
+    if (pos === undefined || pos === null) { pos = new Vec(0,0); }
+    if (angle === undefined || angle === null) { angle = 0; }
+    this.p = pos;
+    this.a = angle;
 
     // Estos puntos están en coordenadas polares, no cartesianas
     this.points = [];
