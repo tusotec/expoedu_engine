@@ -6,7 +6,6 @@
   <script type="text/javascript" src="../js/three.83.js"></script>
   <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
   <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
-  <!--<script type="text/javascript" src="../vendor/cannon.js"></script>-->
 
   <script type="text/javascript" src="../engine/engine.js"></script>
   <script type="text/javascript" src="../engine/input_manager.js"></script>
@@ -14,7 +13,6 @@
 
   <script type="text/javascript" src="../collision/collision.js"></script>
   
-  <!--<script type="text/javascript" src="physics.js"></script>-->
   <script type="text/javascript" src="character.js"></script>
   <script type="text/javascript" src="user.js"></script>
   <script type="text/javascript" src="multiplayer.js"></script>
@@ -27,7 +25,6 @@
   <div id="renderDiv"></div>
   <script type="text/javascript">
     Engine.init({container: renderDiv, fps: 30, height: 300, autoResize: false});
-    //Engine.Physics.init();
 
     var charRadius = 0.25;
     var charHeight = 1.6;
@@ -62,20 +59,14 @@
     );
     Engine.Collidables.add(boxCollision);
 
-    var character = new Engine.CollisionCharacter({
+    var character = new Engine.Character({
       mesh: cyl,
-      //type: Engine.PhysicCharacter.DYNAMIC,
-      type: Engine.CollisionCharacter.MANUAL,
+      playable: true,
       radius: charRadius,
       height: charHeight,
     });
 
     Engine.User.init({character: character, velocity: 3, distance: 4, yOff: 1});
-
-    //var boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-    //var boxBody = new CANNON.Body({mass: 1, shape: boxShape, type: CANNON.Body.STATIC});
-    //boxBody.addShape(boxShape);
-    //Engine.Physics.world.add(boxBody);
 
     /*=== Multiplayer ===*/
 
@@ -88,10 +79,9 @@
       character: character,
       builder: function () {
         var mesh = new THREE.Mesh(playergeom, playermat);
-        var character = new Engine.CollisionCharacter({
+        var character = new Engine.Character({
           mesh: mesh,
-          //type: Engine.PhysicCharacter.KINEMATIC,
-          type: Engine.CollisionCharacter.STATIC,
+          playable: false,
           radius: charRadius,
           height: charHeight,
         });

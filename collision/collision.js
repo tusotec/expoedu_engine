@@ -509,6 +509,7 @@ window.Collision = Collision;
 
 if (window.Engine) {
   window.Engine.Collidables = new Collection();
+  Collision.epsilon = 0.001;
 }
 
 })(window);
