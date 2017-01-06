@@ -1,4 +1,4 @@
-//(function () {
+(function () {
 
 var User = {
   init: function (params) {
@@ -71,6 +71,6 @@ var User = {
   }
 };
 
-Engine.User = User;
+window.Engine.User = User;
 
-//})();
+})();

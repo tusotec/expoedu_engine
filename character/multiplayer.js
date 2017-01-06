@@ -1,4 +1,4 @@
-//(function () {
+(function () {
 
 var Player = function (id, character) {
   this.id = id;
@@ -46,7 +46,7 @@ var Multiplayer = {
       var players = that.players;
       var player = that.getPlayer(data.id);
       if (!player) return;
-      Engine.scene.remove(player.character.mesh);
+      player.character.remove();
       var index = players.indexOf(player);
       if (index > -1) {
         players.splice(index, 1);
@@ -87,4 +87,4 @@ var Multiplayer = {
 
 Engine.Multiplayer = Multiplayer;
 
-//})();
+})();

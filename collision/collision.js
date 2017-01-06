@@ -32,12 +32,12 @@ var Collision = {
     return this.x == that.x && this.y == that.y;
   }
 
-  Vec.prototype.scaled = function (s) {
+  Vec.prototype.scale = function (s) {
     return new Vec(this.x*s, this.y*s);
   }
 
   Vec.prototype.withLength = function (l) {
-    return this.scaled(l/this.length);
+    return this.scale(l/this.length);
   } 
 
   Vec.prototype.toPolar = function () {
@@ -124,7 +124,7 @@ var Collision = {
   Box.prototype.combine = function (that) {
     return new Box(
       Math.min(this.l, that.l),
-      Math.max(this.t, that.r),
+      Math.max(this.r, that.r),
       Math.max(this.t, that.t),
       Math.min(this.b, that.b)
     );
@@ -234,7 +234,7 @@ var Collision = {
     if (t>1) {t=1;}
 
     // Obtener el punto final
-    return this.a.add(ab.scaled(t));
+    return this.a.add(ab.scale(t));
   }
 
   Segment.prototype.dist = function (p) {
@@ -498,5 +498,17 @@ var Collision = {
     }
   }
 
+  Collection.prototype.remove = function (obj) {
+    var index = this.objects.indexOf(obj);
+    if (index >= 0) {
+      this.objects.splice(index, 1);
+    }
+  }
+
 window.Collision = Collision;
+
+if (window.Engine) {
+  window.Engine.Collidables = new Collection();
+}
+
 })(window);

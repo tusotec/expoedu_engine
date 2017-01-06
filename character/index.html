@@ -6,13 +6,15 @@
   <script type="text/javascript" src="../js/three.83.js"></script>
   <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
   <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
-  <script type="text/javascript" src="../vendor/cannon.js"></script>
+  <!--<script type="text/javascript" src="../vendor/cannon.js"></script>-->
 
   <script type="text/javascript" src="../engine/engine.js"></script>
   <script type="text/javascript" src="../engine/input_manager.js"></script>
   <script type="text/javascript" src="../engine/utils.js"></script>
+
+  <script type="text/javascript" src="../collision/collision.js"></script>
   
-  <script type="text/javascript" src="physics.js"></script>
+  <!--<script type="text/javascript" src="physics.js"></script>-->
   <script type="text/javascript" src="character.js"></script>
   <script type="text/javascript" src="user.js"></script>
   <script type="text/javascript" src="multiplayer.js"></script>
@@ -25,15 +27,18 @@
   <div id="renderDiv"></div>
   <script type="text/javascript">
     Engine.init({container: renderDiv, fps: 30, height: 300, autoResize: false});
-    Engine.Physics.init();
+    //Engine.Physics.init();
 
     var charRadius = 0.25;
     var charHeight = 1.6;
 
     var boxStatic = new THREE.Mesh(
-      new THREE.BoxGeometry(0.5,0.5,0.5),
+      new THREE.BoxGeometry(1,0.5,1),
       new THREE.MeshBasicMaterial({color:0xff0000})
     );
+    boxStatic.rotation.y = Math.PI/3;
+    boxStatic.position.set(2, 0, 0);
+
     var cyl = new THREE.Mesh(
       new THREE.CylinderGeometry(charRadius, charRadius, charHeight),
       new THREE.MeshBasicMaterial({color:0x0000ff})
@@ -42,19 +47,35 @@
     Engine.scene.add(cyl);
     Engine.scene.add(boxStatic);
 
-    var character = new Engine.Character({
+    Collision.epsilon = 0.01;
+    Collision.iterations = 5;
+
+    var boxCollision = new Collision.Geometry(
+      [
+        -0.5, -0.5,
+        0.5, -0.5,
+        0.5, 0.5,
+        -0.5, 0.5,
+      ],
+      new Collision.Vec(2,0),
+      -Math.PI/3
+    );
+    Engine.Collidables.add(boxCollision);
+
+    var character = new Engine.CollisionCharacter({
       mesh: cyl,
-      type: Engine.Character.DYNAMIC,
+      //type: Engine.PhysicCharacter.DYNAMIC,
+      type: Engine.CollisionCharacter.MANUAL,
       radius: charRadius,
-      height: charHeight
+      height: charHeight,
     });
 
     Engine.User.init({character: character, velocity: 3, distance: 4, yOff: 1});
 
-    var boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
-    var boxBody = new CANNON.Body({mass: 1, shape: boxShape, type: CANNON.Body.STATIC});
+    //var boxShape = new CANNON.Box(new CANNON.Vec3(0.5, 0.5, 0.5));
+    //var boxBody = new CANNON.Body({mass: 1, shape: boxShape, type: CANNON.Body.STATIC});
     //boxBody.addShape(boxShape);
-    Engine.Physics.world.add(boxBody);
+    //Engine.Physics.world.add(boxBody);
 
     /*=== Multiplayer ===*/
 
@@ -63,15 +84,16 @@
     var playermat = new THREE.MeshBasicMaterial({color:0x00ff00});
 
     Engine.Multiplayer.init({
-      url: "ws://localhost:3000",
+      url: "ws://192.168.1.20:3000",
       character: character,
       builder: function () {
         var mesh = new THREE.Mesh(playergeom, playermat);
-        var character = new Engine.Character({
+        var character = new Engine.CollisionCharacter({
           mesh: mesh,
-          type: Engine.Character.KINEMATIC,
+          //type: Engine.PhysicCharacter.KINEMATIC,
+          type: Engine.CollisionCharacter.STATIC,
           radius: charRadius,
-          height: charHeight
+          height: charHeight,
         });
         clickables.push(mesh); // <--## Temporal ##
         return character;
