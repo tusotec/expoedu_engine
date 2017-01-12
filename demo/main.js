@@ -7,49 +7,52 @@ var loader = new THREE.JSONLoader();
 
 //=== Personaje ===//
 
-var character_url = "/three/examples/models/animated/monster/monster.js";
+var character_url = "../personaje.json";
+var walk_anim = "HombreAction";
+var idle_anim = "HombreAction.002";
 
 var character_mesh = null;
 var character_mixer = null;
 
-var walkAnim = null;
+//character_url = "../robots/expo_robot_1.json";
+//walk_anim = "walk";
+//idle_anim = "idle";
 
 var controller;
 
 loader.load(character_url, function (geometry, materials) {
 
-  // Necesario para el monstruo, no sé si para todos los modelos animados...
-  materials.forEach(function (mat) { mat.morphTargets = true; });
+  materials.forEach(function (mat) { mat.skinning = true; });
 
   var material = new THREE.MultiMaterial( materials );
 
-  mesh = new THREE.Mesh(geometry, material);
+  mesh = new THREE.SkinnedMesh(geometry, material);
   character_mesh = mesh;
 
-  // El Monstruo es INMENSO
-  var s = 0.001;
+  var s = 0.3;
   mesh.scale.set( s, s, s );
 
   character_mixer = new THREE.AnimationMixer(mesh);
-  walk_anim = geometry.animations[0];
 
   var clip = character_mixer.clipAction(walk_anim);
   clip.setDuration(1);
   clip.setEffectiveWeight(0);
   clip.play();
 
-  // Esto es necesario porque el modelo del monstruo está rotado
+  var clip = character_mixer.clipAction(idle_anim);
+  clip.setDuration(20);
+  clip.setEffectiveWeight(0);
+  clip.play();
+
+  // Esto es necesario si el modelo está rotado o movido
   var obj = new THREE.Object3D();
   obj.add(mesh);
-  mesh.rotation.y = -Math.PI/2;
-  mesh.position.z = -1;
 
   Engine.scene.add( obj );
 
   controller = new CharacterController({
     mesh: obj, cam: Engine.camera, animations: null,
-    velocity: 10, angleSmooth: 3, distance: 4, yOff: 0.8});
-  // Velocidad del monstruo debería ser 2.6
+    velocity: 1.5, angleSmooth: 3, distance: 4, yOff: 0.8});
 });
 
 //=== Expo ===//
@@ -79,13 +82,14 @@ Engine.update = function (delta) {
   if (controller) {
     controller.update(delta);
 
-    var clip = character_mixer.clipAction(walk_anim);
+    var walk_clip = character_mixer.clipAction(walk_anim);
+    var idle_clip = character_mixer.clipAction(idle_anim);
 
-    if (controller.moveAmount > 0) {
-      clip.setEffectiveWeight(controller.moveAmount);
-    } else {
-      clip.setEffectiveWeight(0);
-    }
+    var vel = controller.moveAmount;
+
+    walk_clip.setEffectiveWeight(vel);
+    idle_clip.setEffectiveWeight(1-vel);
+
     character_mixer.update( delta );
 
   }
