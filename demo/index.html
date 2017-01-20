@@ -8,7 +8,7 @@
   <link rel="stylesheet" type="text/css" href="main.css">
 
   <!--<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.css">-->
-  <link rel="stylesheet" href="/font-awesome/css/font-awesome.css">
+  <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.css">
 </head>
 <body>
   <div id="content">
@@ -33,9 +33,9 @@
         </div>
         <div class="menu-body">
           <ul>
-            <li onclick="mostrarPos()">Mostrar Posición</li>
+            <!--<li onclick="mostrarPos()">Mostrar Posición</li>
             <li onclick="cargarExpo()">Cargar Expo</li>
-            <li onclick="cargarStands()">Cargar Stands</li>
+            <li onclick="cargarStands()">Cargar Stands</li>-->
             <li><i class="fa fa-suitcase"></i> Portafolio </li>
             <li><i class="fa fa-map"></i> Mapa </li>
             <li><i class="fa fa-calendar"></i> Calendario </li>
@@ -49,14 +49,20 @@
   </div>
 
   <!-- Scripts Externos -->
-    <script type="text/javascript" src="../js/three.83.js"></script>
-    <script type="text/javascript" src="../engine/vendor/hammer.js"></script>
-    <script type="text/javascript" src="../engine/vendor/socket.io.js"></script>
-    <script type="text/javascript" src="../engine/vendor/cannon.js"></script>
+    <script type="text/javascript" src="../vendor/three.83.js"></script>
+    <script type="text/javascript" src="../vendor/hammer.js"></script>
+    <script type="text/javascript" src="../vendor/socket.io.js"></script>
+    <script type="text/javascript" src="../vendor/cannon.js"></script>
 
     <script type="text/javascript" src="../engine/engine.js"></script>
+    <script type="text/javascript" src="../engine/utils.js"></script>
     <script type="text/javascript" src="../engine/input_manager.js"></script>
-    <script type="text/javascript" src="../engine/character_controller.js"></script>
+
+    <script type="text/javascript" src="../collision/collision.js"></script>
+
+    <script type="text/javascript" src="../character/user.js"></script>
+    <script type="text/javascript" src="../character/character.js"></script>
+
 
     <script type="text/javascript" src="expo.js"></script>
     <script type="text/javascript" src="stands.js"></script>

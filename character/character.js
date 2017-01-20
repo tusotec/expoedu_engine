@@ -30,6 +30,24 @@
       }
     }
 
+    if (params.animationMixer) {
+      this.mixer = params.animationMixer;
+
+      var walk = this.mixer.clipAction(params.walk_anim);
+      if (walk) {
+        this.walk_clip = walk;
+        walk.setEffectiveWeight(0);
+        walk.play();
+      }
+
+      var idle = this.mixer.clipAction(params.idle_anim);
+      if (idle) {
+        this.idle_clip = idle;
+        idle.setEffectiveWeight(0);
+        idle.play();
+      }
+    }
+
     var $this = this;
     Engine.onPreupdate(function (delta) { $this.update(delta) });
   };
@@ -95,12 +113,27 @@
       }
       
       // Mover el personaje hacia la dirección
-      if (this.direction.length == 0) return;
-      var ndir = this.direction.clone();
-      ndir.length *= this.velocity * delta;
-      var prev = this.getPosition();
-      var next = prev.plus(ndir.toCoord());
-      this.setPosition(next);
+      if (this.direction.length > 0) {
+        var ndir = this.direction.clone();
+        ndir.length *= this.velocity * delta;
+        var prev = this.getPosition();
+        var next = prev.plus(ndir.toCoord());
+        this.setPosition(next);
+      }
+
+      if (this.mixer) {
+        var vel = character.direction.length;
+
+        if (this.walk_clip) {
+          this.walk_clip.setEffectiveWeight(vel);
+        }
+
+        if (this.idle_clip) {
+          this.idle_clip.setEffectiveWeight(1-vel);
+        }
+
+        this.mixer.update( delta );
+      }
     },
     remove: function () {
       Engine.scene.remove(this.mesh);

@@ -18,7 +18,7 @@ var character_mixer = null;
 //walk_anim = "walk";
 //idle_anim = "idle";
 
-var controller;
+var character;
 
 loader.load(character_url, function (geometry, materials) {
 
@@ -32,33 +32,44 @@ loader.load(character_url, function (geometry, materials) {
   var s = 0.3;
   mesh.scale.set( s, s, s );
 
-  character_mixer = new THREE.AnimationMixer(mesh);
-
-  var clip = character_mixer.clipAction(walk_anim);
-  clip.setDuration(1);
-  clip.setEffectiveWeight(0);
-  clip.play();
-
-  var clip = character_mixer.clipAction(idle_anim);
-  clip.setDuration(20);
-  clip.setEffectiveWeight(0);
-  clip.play();
-
   // Esto es necesario si el modelo está rotado o movido
   var obj = new THREE.Object3D();
   obj.add(mesh);
 
   Engine.scene.add( obj );
 
-  controller = new CharacterController({
-    mesh: obj, cam: Engine.camera, animations: null,
-    velocity: 1.5, angleSmooth: 3, distance: 4, yOff: 0.8});
+  character = new Engine.Character({
+    mesh: obj,
+    velocity: 1.5,
+    playable: true,
+    radius: 0.5,
+    height: 1.6,
+
+    animationMixer: new THREE.AnimationMixer(mesh),
+    walk_anim: "HombreAction",
+    idle_anim: "HombreAction.002",
+  });
+
+  Engine.User.init({character: character, distance: 4, yOff: 0.8});
 });
 
 //=== Expo ===//
 
-//cargarExpo();
-//cargarStands();
+cargarExpo();
+cargarStands();
+
+// El polígono de colisión está incompleto, aparece rotado y no deja pasar
+// a los stands, por eso no lo agrego
+
+// TODO: Las colisiones se rompen con computadoras con bajo FPS, atraviesa
+// las paredes. Tengo que revisar eso.
+
+var expoCollision = new Collision.Geometry(
+  expo_poly, // vertices
+  new Collision.Vec(0,0), // pos
+  0 // angle
+);
+//Engine.Collidables.add(expoCollision);
 
 function loadContent (name) {
   var url = "content/" + name + ".html";
@@ -79,20 +90,7 @@ function loadContent (name) {
 //=== Iniciar ===//
 
 Engine.update = function (delta) {
-  if (controller) {
-    controller.update(delta);
 
-    var walk_clip = character_mixer.clipAction(walk_anim);
-    var idle_clip = character_mixer.clipAction(idle_anim);
-
-    var vel = controller.moveAmount;
-
-    walk_clip.setEffectiveWeight(vel);
-    idle_clip.setEffectiveWeight(1-vel);
-
-    character_mixer.update( delta );
-
-  }
 };
 
 function hideAdressBar () {
