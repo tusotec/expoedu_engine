@@ -8,6 +8,16 @@ window.Input = {
     "deltaX": 0, "deltaY": 0,
     "movedX": 0, "movedY": 0
   },
+  "zoom": {
+    "delta": 0,
+    "accumulated": 0,
+
+    "pinching": false,
+    "pinch": {
+      "total": 0,
+      "cur": 0,
+    }
+  },
   "joystick": {
     "pos": {"x": 0, "y": 0},
     "center": {"x": 0, "y": 0},
@@ -102,16 +112,25 @@ Engine.onInit(function () {
     mouse.y = ev.center.y;
     mouse.totalX = ev.deltaX;
     mouse.totalY = ev.deltaY;
+
+    ev.preventDefault();
+    return false;
   });
 
   mc.on("panstart", function (ev) {
     mouse.dragging = true;
-  })
+
+    ev.preventDefault();
+    return false;
+  });
 
   mc.on("panend", function (ev) {
     mouse.dragging = false;
     resetMouse();
-  })
+
+    ev.preventDefault();
+    return false;
+  });
 
   mc.on("tap", function (ev) {
     getDimensions();
@@ -122,7 +141,43 @@ Engine.onInit(function () {
     });
     //Input.onclick(Input.click);
     //Input.onclick(ev);
-  })
+  });
+
+  mc.get('pinch').set({ enable: true });
+
+  mc.on("pinchstart", function (ev) {
+    Input.zoom.pinching = true;
+
+    // No escalar por el valor inicial
+    Input.zoom.pinch.old = ev.scale;
+  });
+
+  mc.on("pinchend", function (ev) {
+    Input.zoom.pinching = false;
+  });
+
+  // TODO: esto
+  mc.on("pinchmove", function (ev) {
+    Input.zoom.pinch.cur = ev.scale;
+  });
+
+  Engine.canvas.addEventListener("wheel", function (ev) {
+    // ev.deltaY es positivo cuando va hacia abajo, tengo que invertirlo
+    var delta;
+    switch (ev.deltaMode) {
+      case 0: // Pixeles
+        delta = -ev.deltaY;
+        break;
+      case 1: // Líneas
+        delta = -ev.deltaY / 20;
+        break;
+      case 2: // Páginas
+        // No soportado
+        break;
+    }
+    Input.zoom.accumulated += delta;
+    return false;
+  });
 
   function getDimensions() {
     var box = Engine.canvas.getBoundingClientRect();
@@ -141,6 +196,15 @@ Engine.onPreupdate(function () {
     mouse.deltaY = mouse.totalY - mouse.movedY;
     mouse.movedX = mouse.totalX;
     mouse.movedY = mouse.totalY;
+  }
+
+  Input.zoom.delta = Input.zoom.accumulated;
+  Input.zoom.accumulated = 0;
+
+  if (Input.zoom.pinching) {
+    var pinch = Input.zoom.pinch;
+    Input.zoom.delta = pinch.cur - pinch.old;
+    pinch.old = pinch.cur;
   }
 });
 

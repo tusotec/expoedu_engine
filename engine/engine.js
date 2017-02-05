@@ -13,6 +13,7 @@ window.Engine = {
   _functions: {
     init: [],
     preupdate: [],
+    postupdate: [],
     load: []
   },
   webgl: true,
@@ -61,9 +62,30 @@ function onResize () {
   Engine.setSize(width, height);
 }
 
+function checkSupport () {
+  try {
+    var canvas = document.createElement('canvas');
+    return !! (
+      window.WebGLRenderingContext && (
+        canvas.getContext('webgl') ||
+        canvas.getContext('experimental-webgl')
+      )
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
 window.Engine.init = function (inparams) {
   var params = extend(defaultParams, inparams);
   var width = params.width, height = params.height;
+
+  if (!checkSupport()) {
+    var msg = "Tu navegador no soporta WebGL. Intenta probar con otro navegador.";
+    console.error(msg)
+    alert(msg);
+    return;
+  }
 
   this.fps = params.fps;
 
@@ -118,6 +140,10 @@ window.Engine.onPreupdate = function (func) {
   this._functions.preupdate.push(func);
 }
 
+window.Engine.onPostupdate = function (func) {
+  this._functions.postupadte.push(func);
+}
+
 window.Engine.render = function() {
   var eng = window.Engine;
   if (eng.running) {
@@ -136,6 +162,10 @@ window.Engine.render = function() {
   }
 
   eng.update(delta);
+
+  for (var i = 0; i < eng._functions.postupdate.length; i++) {
+    eng._functions.postupdate[i](delta);
+  }
 
   eng.renderer.render(eng.scene, eng.camera);
 }

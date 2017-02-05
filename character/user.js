@@ -14,9 +14,15 @@ var User = {
     this.xSensibility = params.xSensibility || 100;
     this.ySensibility = params.ySensibility || 100;
 
+    this.cameraColliders = [];
+
+    this.zoomForce = params.zoomForce || 1;
+
+    // Positivo es cerca, negativo es lejos
+    this.zoom = 0;
+
     var that = this;
 
-    // No puedo hacer `Engine.onPreupdate(this.update)` porque cambiaría el `this`.
     Engine.onPreupdate(function (delta) {
       that.updateMouse();
       that.updateCamera();
@@ -24,6 +30,7 @@ var User = {
     });
   },
   updateMouse: function () {
+    var mouse = Input.mouseDrag;
     if (mouse.dragging) {
       this.xAngle -= -mouse.deltaY / this.ySensibility;
       this.yAngle -= mouse.deltaX / this.xSensibility;
@@ -32,19 +39,115 @@ var User = {
       if (this.xAngle > this.maxAngle) {this.xAngle = this.maxAngle}
       if (this.xAngle < -this.maxAngle) {this.xAngle = -this.maxAngle}
     }
+    if (Input.zoom.delta != 0) {
+      this.zoom += Input.zoom.delta;
+    }
   },
   updateCamera: function () {
+    // TODO: Simplificar y reducir esta función,
+    // es muy larga y el algoritmo es muy complicado
+
     var campos = Engine.camera.position;
     var center = this.character.mesh.position.clone();
     center.y += this.yOff;
 
-    var xDist = Math.cos(this.xAngle)*this.distance;
-    var yDist = Math.sin(this.xAngle)*this.distance;
+    var distance = this.distance * Math.pow(this.zoomForce+1, -this.zoom);
 
-    campos.x = Math.sin(this.yAngle)*xDist + center.x;
-    campos.y = center.y + yDist;
-    campos.z = Math.cos(this.yAngle)*xDist + center.z;
+    var dx = Math.sin(this.yAngle);
+    var dz = Math.cos(this.yAngle);
+    var dy = Math.sin(this.xAngle);
 
+    var direction = new THREE.Vector3(dx, dy, dz).normalize();
+
+    // Posición tentativa de la cámaradd.
+    var newpos = center.clone().add(
+      direction.clone().multiplyScalar(distance)
+    );
+
+    // Rayo hacia la cámara
+    var ray = new THREE.Raycaster(center, direction, 0, distance);
+    // Rayo desde la cámara
+    var rayback = new THREE.Raycaster(newpos, direction.clone().negate(), 0, distance);
+
+    // Obstrucciones del centro a la cámara
+    var cenpts = ray.intersectObjects(this.cameraColliders, true);
+    // Obstrucciones de la cámara al centro
+    var campts = rayback.intersectObjects(this.cameraColliders, true);
+
+    // Punto más cercano a la cámara.
+    var tocam, closest;
+    function getClosest () {
+      closest = null;
+
+      // Punto con normal hacia la cámara
+      var ptcam = campts.length > 0 ? campts[0] : null;
+
+      // Punto con normal hacia el centro
+      var ptcen = cenpts.length > 0 ? cenpts[cenpts.length-1] : null;
+
+      // Si ambos puntos existen
+      if (ptcam && ptcen) {
+        // Distancias hasta la cámara
+        var dst1 = ptcam.distance;
+        var dst2 = distance - ptcen.distance;
+
+        if (dst1 < dst2) { closest = ptcam; }
+        else { closest = ptcen; }
+      }
+      else if (ptcam) { closest = ptcam; }
+      else if (ptcen) { closest = ptcen; }
+      else { closest = null; return false; }
+
+      if (closest === ptcam) { campts.shift(); }
+      if (closest === ptcen) { cenpts.pop(); }
+      tocam = (closest === ptcam);
+      return true;
+    }
+
+    var newdist = distance;
+
+    var count = 0;
+    while (getClosest()) {
+      if (!tocam) {
+        // El punto con normal apuntando al centro.
+        // La cámara está dentro de un objeto.
+        console.log("Dentro de un objeto");
+
+        // Empujarla hacia afuera
+
+        // pt2.distance: el rayo fue lanzado desde el centro, esta es la
+        //   distancia hasta el centro
+        // 0.1: acercar la cámara 10cm hacia el centro
+        newdist = closest.distance - 0.1;
+
+      } else {
+        // El punto con normal apuntando a la cámara.
+        // Hay un objeto obstaculizando.
+
+        console.log("Obstáculo")
+
+        // Distancia desde el objeto hasta el centro
+
+        // Como el rayo fue lanzado desde la cámara, la distancia
+        // hasta el centro es el número inverso
+        var dst = distance - closest.distance;
+
+        // Si el objeto está lejos suficiente de la cámara (más de un metro)
+        if (newdist - dst > 1) {
+          // Entonces esta posición está bien, terminar el algoritmo
+          break;
+        }
+        // Si no, ignorar este punto y continuar, así parece que
+        // la cámara está en un objeto y lo atraviesa.
+      }
+    }
+
+    // Mover la cámara
+    var newpos = center.clone().add(
+      direction.clone().multiplyScalar(newdist)
+    );
+
+    campos.copy(newpos);
     Engine.camera.lookAt(center);
   },
   update: function (delta) {

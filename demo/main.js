@@ -40,7 +40,7 @@ loader.load(character_url, function (geometry, materials) {
 
   character = new Engine.Character({
     mesh: obj,
-    velocity: 1.5,
+    velocity: 4, // Tiene que ser ~1.5 para que coordine con la animación
     playable: true,
     radius: 0.5,
     height: 1.6,
@@ -55,8 +55,8 @@ loader.load(character_url, function (geometry, materials) {
 
 //=== Expo ===//
 
-cargarExpo();
-cargarStands();
+//cargarExpo();
+//cargarStands();
 
 // El polígono de colisión está incompleto, aparece rotado y no deja pasar
 // a los stands, por eso no lo agrego
@@ -90,7 +90,6 @@ function loadContent (name) {
 //=== Iniciar ===//
 
 Engine.update = function (delta) {
-
 };
 
 function hideAdressBar () {

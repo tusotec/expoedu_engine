@@ -68,9 +68,16 @@ var expo_poly = [
   -2.8, 42.47,
 ];
 
+var expoObject = null;
+
 function cargarExpo () {
   var loader = new THREE.JSONLoader();
   var texture_loader = new THREE.TextureLoader();
+
+  expoObject = new THREE.Object3D();
+  Engine.scene.add( expoObject );
+
+  Engine.User.cameraColliders.push(expoObject);
 
   // Tengo que hacerlo así de horrible porque los modelos están
   // mal exportados
@@ -114,7 +121,9 @@ function cargarExpo () {
 
       var material = new THREE.MeshFaceMaterial(mats);
       var model = new THREE.Mesh(geom, material);
-      Engine.scene.add(model);
+
+      //Engine.scene.add(model);
+      expoObject.add(model);
     });
   });
 }

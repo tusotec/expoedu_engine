@@ -13,6 +13,17 @@
 <body>
   <div id="content">
     <div id="hud">
+
+      <!-- No hay consola en movil, así que uso esto. debugspan.textContent = "..."; -->
+      <p style="
+        color: white;
+        background-color: rgba(0,0,0,0);
+        position: absolute;
+        width:100%;
+        display: none;">
+        <span id="debugspan"></span>
+      </p>
+
       <div id="joystick">
         <img src="joystick.svg">
       </div>
@@ -33,9 +44,9 @@
         </div>
         <div class="menu-body">
           <ul>
-            <!--<li onclick="mostrarPos()">Mostrar Posición</li>
-            <li onclick="cargarExpo()">Cargar Expo</li>
-            <li onclick="cargarStands()">Cargar Stands</li>-->
+            <!--<li onclick="mostrarPos()">Mostrar Posición</li>-->
+            <li onclick="cargarExpo()">Cargar Pabellón</li>
+            <li onclick="cargarStands()">Cargar Stands</li>
             <li><i class="fa fa-suitcase"></i> Portafolio </li>
             <li><i class="fa fa-map"></i> Mapa </li>
             <li><i class="fa fa-calendar"></i> Calendario </li>
