@@ -1,6 +1,7 @@
 (function () {
 
 var User = {
+  cameraColliders: [],
   init: function (params) {
     // Debe invocarse después del Motor.
     this.params = params;
@@ -13,8 +14,6 @@ var User = {
     this.maxAngle = params.maxAngle || 1.4; // Aprox. PI/2
     this.xSensibility = params.xSensibility || 100;
     this.ySensibility = params.ySensibility || 100;
-
-    this.cameraColliders = [];
 
     this.zoomForce = params.zoomForce || 1;
 

@@ -55,8 +55,8 @@ loader.load(character_url, function (geometry, materials) {
 
 //=== Expo ===//
 
-//cargarExpo();
-//cargarStands();
+cargarExpo();
+cargarStands();
 
 // El polígono de colisión está incompleto, aparece rotado y no deja pasar
 // a los stands, por eso no lo agrego
