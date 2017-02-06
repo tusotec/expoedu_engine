@@ -22,9 +22,16 @@ var character;
 
 loader.load(character_url, function (geometry, materials) {
 
+  geometry.faceVertexUvs.push(geometry.faceVertexUvs[0]);
+
   materials.forEach(function (mat) { mat.skinning = true; });
 
   var material = new THREE.MultiMaterial( materials );
+
+  material = materials[0];
+  //material.aoMap = null;
+
+  //material = new MeshBasicMaterial({color: 0xffffff});
 
   mesh = new THREE.SkinnedMesh(geometry, material);
   character_mesh = mesh;
@@ -46,8 +53,8 @@ loader.load(character_url, function (geometry, materials) {
     height: 1.6,
 
     animationMixer: new THREE.AnimationMixer(mesh),
-    walk_anim: "HombreAction",
-    idle_anim: "HombreAction.002",
+    walk_anim: "Hombre Caminado",
+    idle_anim: "Hombre de pie",
   });
 
   Engine.User.init({character: character, distance: 4, yOff: 0.8});
@@ -106,4 +113,13 @@ function hideAdressBar () {
 
 hideAdressBar();
 
-Engine.start();
+THREE.DefaultLoadingManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
+  document.getElementById("loadspan").textContent = itemsLoaded + " / " + itemsTotal;
+};
+
+
+THREE.DefaultLoadingManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
+  Engine.start();
+  document.getElementById("load").style.display = "none";
+};
+

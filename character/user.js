@@ -90,7 +90,17 @@ var User = {
         var dst1 = ptcam.distance;
         var dst2 = distance - ptcen.distance;
 
-        if (dst1 < dst2) { closest = ptcam; }
+        // Cuando un objeto es una cara con ambos lados visibles, ambos
+        // puntos están a la misma distancia, en ese caso tiene prioridad el
+        // punto que apunta a la cámara, para que se comporte como un objeto
+
+        // Pero desafortunadamente en ese caso casi nunca son iguales, por lo
+        // de la precisión de coma flotante, sino están muuy cerca. Por eso
+        // tengo que usar la diferencia en vez de el valor exacto
+
+        var dif = dst2 - dst1;
+        // [dif > 0] => [dst2 > dst1]
+        if (dif > -0.1) { closest = ptcam; }
         else { closest = ptcen; }
       }
       else if (ptcam) { closest = ptcam; }
@@ -110,7 +120,6 @@ var User = {
       if (!tocam) {
         // El punto con normal apuntando al centro.
         // La cámara está dentro de un objeto.
-        console.log("Dentro de un objeto");
 
         // Empujarla hacia afuera
 
@@ -122,8 +131,6 @@ var User = {
       } else {
         // El punto con normal apuntando a la cámara.
         // Hay un objeto obstaculizando.
-
-        console.log("Obstáculo")
 
         // Distancia desde el objeto hasta el centro
 

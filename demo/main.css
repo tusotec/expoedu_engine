@@ -46,6 +46,12 @@ html, body {
   pointer-events: none;
 }
 
+#load {
+  color: white;
+  background-color: rgba(0,0,0,0);
+  position: absolute;
+}
+
 .menu {
   display: inline-block;
   position: absolute;
