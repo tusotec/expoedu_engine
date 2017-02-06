@@ -7,11 +7,24 @@
 
   <link rel="stylesheet" type="text/css" href="main.css">
 
-  <!--<link rel="stylesheet" type="text/css" href="/bootstrap/css/bootstrap.css">-->
+  <!--<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
+
   <link rel="stylesheet" href="../vendor/font-awesome/css/font-awesome.css">
 </head>
 <body>
-  <div id="content">
+  <div class="load-screen" id="load-screen">
+    <div class="load-screen-inner">
+      <div>
+        <img src="../loading.gif" class="load-img">
+        <span class="load-title">Cargando...</span>
+      </div>
+      <div>
+        <span id="load-status" class="load-status">Cargando</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="content" style="visibility: hidden;">
     <div id="hud">
 
       <!-- No hay consola en movil, así que uso esto. debugspan.textContent = "..."; -->
@@ -23,10 +36,6 @@
         display: none;">
         <span id="debugspan"></span>
       </p>
-
-      <div id="load" style="display:none;">
-        <p>Cargando <span id="loadpercent"></span></p>
-      </div>
 
       <div id="joystick">
         <img src="joystick.svg">
@@ -64,6 +73,8 @@
   </div>
 
   <!-- Scripts Externos -->
+    <!--<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>-->
+
     <script type="text/javascript" src="../vendor/three.83.js"></script>
     <script type="text/javascript" src="../vendor/hammer.js"></script>
     <script type="text/javascript" src="../vendor/socket.io.js"></script>

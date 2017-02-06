@@ -11,7 +11,7 @@ html, body {
 #content {
   width: 100%;
   height: 100%;
-  position: relative;
+  position: absolute;
   overflow: hidden;
 }
 
@@ -46,10 +46,40 @@ html, body {
   pointer-events: none;
 }
 
-#load {
-  color: white;
-  background-color: rgba(0,0,0,0);
+
+.load-screen {
+  width: 100%;
+  height: 100%;
   position: absolute;
+  overflow: hidden;
+  display: table;
+}
+
+.load-screen-inner {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.load-img {
+  height: 2em;
+  vertical-align: middle;
+}
+
+.load-title:before {
+  content:" ";
+  display:inline-block; 
+  width:0.5em;
+}
+
+.load-title {
+  font-size: 2em;
+  color: #777777;
+  vertical-align: middle;
+}
+
+.load-status {
+  color: #888888;
 }
 
 .menu {

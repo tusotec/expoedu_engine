@@ -47,7 +47,7 @@ loader.load(character_url, function (geometry, materials) {
 
   character = new Engine.Character({
     mesh: obj,
-    velocity: 4, // Tiene que ser ~1.5 para que coordine con la animación
+    velocity: 4, // Tiene que ser exactamente 1.4 para que sincronice con la animación
     playable: true,
     radius: 0.5,
     height: 1.6,
@@ -113,13 +113,20 @@ function hideAdressBar () {
 
 hideAdressBar();
 
-THREE.DefaultLoadingManager.onStart = function ( url, itemsLoaded, itemsTotal ) {
-  document.getElementById("loadspan").textContent = itemsLoaded + " / " + itemsTotal;
-};
-
-
 THREE.DefaultLoadingManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
-  Engine.start();
-  document.getElementById("load").style.display = "none";
+  if (itemsLoaded < itemsTotal-1) {
+    document.getElementById("load-status").textContent =
+      "Descargando recursos: " + itemsLoaded + " / " + itemsTotal;
+  } else {
+    document.getElementById("load-status").textContent = "Iniciando Feria";
+
+    hideAdressBar();
+    
+    setTimeout(function () {
+      Engine.start();
+      document.getElementById("load-screen").style.display = "none";
+      document.getElementById("content").style.visibility = "";
+    }, 100); // 0.1 seg
+  }
 };
 
